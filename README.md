@@ -4,6 +4,8 @@ Pocket Cat Life is a cozy virtual pet MVP built with plain HTML, CSS, and JavaSc
 
 Version 5 adds the Cat Action Animation System. Mochi now reacts with CSS animations when the player feeds, pets, cleans, plays, sleeps, or works.
 
+Version 5 visual polish also pushes the Home screen closer to a 3D mobile pet game: darker app shell, warm 3D room styling, round action buttons, a larger glossy cat, and stronger shadows/highlights.
+
 ## How to Run
 
 You can still open `index.html` directly in a browser to play the game.
