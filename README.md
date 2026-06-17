@@ -2,7 +2,7 @@
 
 Pocket Cat Life is a cozy virtual pet MVP built with plain HTML, CSS, and JavaScript. You care for Mochi the cat, earn coins, decorate the room, complete daily tasks, unlock achievements, install it as a PWA, and build a long-term bond over time.
 
-Version 4 adds core retention systems: daily check-in streaks, a 7-day cat diary, a coin-based lucky draw, inventory, and bottom navigation.
+Version 5 adds the Cat Action Animation System. Mochi now reacts with CSS animations when the player feeds, pets, cleans, plays, sleeps, or works.
 
 ## How to Run
 
@@ -21,6 +21,69 @@ http://localhost:8080
 ```
 
 On a real phone, host the folder on HTTPS or access a development server from the same network. Service workers do not register from plain `file://` pages.
+
+## Version 5 Cat Action Animation System
+
+- Idle animation:
+  - Gentle breathing
+  - Slow tail sway
+  - Occasional blinking
+- Pet animation:
+  - Mochi jumps happily
+  - Eyes become happy curves
+  - Floating heart effect appears
+- Feed animation:
+  - Food bowl appears
+  - Mochi dips down to eat
+  - Lick-mouth detail appears after eating
+  - Hunger increases
+- Play animation:
+  - Yarn ball appears
+  - Mochi pounces left and right
+  - Happiness increases
+  - Energy decreases
+- Sleep animation:
+  - Mochi lies down
+  - Eyes close
+  - Zzz floats upward
+  - Energy restores in small timed steps
+- Clean animation:
+  - Bubbles appear
+  - Mochi shakes
+  - Cleanliness increases
+- Work animation:
+  - Mochi wears a small work hat and bag
+  - Coins pop upward
+  - Energy decreases
+  - Coins increase
+- State animation classes:
+  - Hungry: low-energy posture
+  - Dirty: dust spots appear
+  - Sleepy: half-closed eyes
+  - Happy: bouncier idle and faster tail
+  - Sad: lowered head and sad mouth
+
+## Animation Class Names
+
+- Idle: `cat-idle`
+- Pet: `cat-pet`
+- Feed: `cat-feed`
+- Play: `cat-play`
+- Sleep: `cat-sleep`
+- Clean: `cat-clean`
+- Work: `cat-work`
+- Hungry: `cat-hungry`
+- Dirty: `cat-dirty`
+- Sleepy: `cat-sleepy`
+- Happy: `cat-happy`
+- Sad: `cat-sad`
+- Room prop classes:
+  - Pet props: `room-action-pet`
+  - Feed props: `room-action-feed`
+  - Play props: `room-action-play`
+  - Sleep props: `room-action-sleep`
+  - Clean props: `room-action-clean`
+  - Work props: `room-action-work`
 
 ## Version 4 Features
 

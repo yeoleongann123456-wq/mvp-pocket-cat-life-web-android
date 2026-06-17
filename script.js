@@ -2,6 +2,44 @@ const STORAGE_KEY = "pocketCatLifeSave";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const EVENT_INTERVAL_MS = 45000;
 
+const catActionClasses = [
+  "cat-pet",
+  "cat-feed",
+  "cat-play",
+  "cat-sleep",
+  "cat-clean",
+  "cat-work"
+];
+
+const roomActionClasses = [
+  "room-action-pet",
+  "room-action-feed",
+  "room-action-play",
+  "room-action-sleep",
+  "room-action-clean",
+  "room-action-work"
+];
+
+const catStateClasses = [
+  "happy",
+  "sad",
+  "sleepy",
+  "cat-happy",
+  "cat-sad",
+  "cat-sleepy",
+  "cat-hungry",
+  "cat-dirty"
+];
+
+const actionDurations = {
+  pet: 900,
+  feed: 1600,
+  play: 1300,
+  sleep: 2300,
+  clean: 1000,
+  work: 1300
+};
+
 const defaultState = {
   hunger: 82,
   happiness: 84,
@@ -203,6 +241,8 @@ const shopItems = [
 ];
 
 let state = loadState();
+let catActionTimer = null;
+let sleepRecoveryTimer = null;
 
 const els = {
   coinsText: document.getElementById("coinsText"),
@@ -407,7 +447,7 @@ function performAction(action) {
       return true;
     },
     sleep: () => {
-      adjustStats({ energy: 24, happiness: 4, hunger: -3 });
+      adjustStats({ energy: 10, happiness: 4, hunger: -3 });
       gainBond(4);
       setMessage("Mochi had a soft little nap.");
       return true;
@@ -438,6 +478,12 @@ function performAction(action) {
 
   saveState();
   render();
+  if (succeeded) {
+    triggerCatAction(action);
+    if (action === "sleep") {
+      startSleepRecovery();
+    }
+  }
 }
 
 function failAction(message) {
@@ -670,19 +716,23 @@ function useInventoryItem(itemId) {
     consumeInventoryItem(itemId);
     incrementActionProgress("feed");
     setMessage("Mochi enjoyed a snack from your bag.");
+    triggerCatAction("feed");
   } else if (itemId === "toy_mouse") {
     adjustStats({ happiness: 14, energy: -4 });
     consumeInventoryItem(itemId);
     incrementActionProgress("play");
     setMessage("Mochi played with the tiny mouse toy.");
+    triggerCatAction("play");
   } else if (itemId === "rare_collar") {
     if (!state.owned.includes("collar")) state.owned.push("collar");
     consumeInventoryItem(itemId);
     setMessage("Mochi is wearing the rare Moonbell Collar.");
+    triggerCatAction("pet");
   } else if (itemId === "decor_cloud") {
     if (!state.owned.includes("decor")) state.owned.push("decor");
     consumeInventoryItem(itemId);
     setMessage("You placed the Cloud Cushion near Mochi's cozy corner.");
+    triggerCatAction("clean");
   } else {
     setMessage(`${item.name} is safe in your bag for now.`);
   }
@@ -761,6 +811,44 @@ function checkAchievements() {
   });
 }
 
+function triggerCatAction(action) {
+  const catClass = `cat-${action}`;
+  const roomClass = `room-action-${action}`;
+  if (!catActionClasses.includes(catClass) || !roomActionClasses.includes(roomClass)) return;
+
+  window.clearTimeout(catActionTimer);
+  els.cat.classList.remove("cat-idle", ...catActionClasses);
+  els.room.classList.remove(...roomActionClasses);
+  void els.cat.offsetWidth;
+
+  els.cat.classList.add("cat-action", catClass);
+  els.room.classList.add(roomClass);
+
+  catActionTimer = window.setTimeout(() => {
+    els.cat.classList.remove("cat-action", catClass);
+    els.room.classList.remove(roomClass);
+    els.cat.classList.add("cat-idle");
+    renderCatMood();
+  }, actionDurations[action] || 1000);
+}
+
+function startSleepRecovery() {
+  window.clearInterval(sleepRecoveryTimer);
+  let recoveryTicks = 0;
+
+  sleepRecoveryTimer = window.setInterval(() => {
+    recoveryTicks += 1;
+    adjustStats({ energy: 5 });
+    saveState();
+    render();
+
+    if (recoveryTicks >= 3 || state.energy >= 100) {
+      window.clearInterval(sleepRecoveryTimer);
+      sleepRecoveryTimer = null;
+    }
+  }, 520);
+}
+
 function render() {
   renderStats();
   renderCatMood();
@@ -792,19 +880,34 @@ function renderStats() {
 }
 
 function renderCatMood() {
-  els.cat.classList.remove("happy", "sad", "sleepy");
-
-  if (state.energy < 24) {
-    els.cat.classList.add("sleepy");
-    return;
+  els.cat.classList.remove(...catStateClasses);
+  if (!els.cat.classList.contains("cat-action")) {
+    els.cat.classList.add("cat-idle");
   }
 
-  if (lowestNeed() < 28) {
-    els.cat.classList.add("sad");
-    return;
+  const hungry = state.hunger < 30;
+  const dirty = state.cleanliness < 34;
+  const sleepy = state.energy < 28;
+  const sad = state.happiness < 32 || lowestNeed() < 24;
+  const happy = state.happiness >= 72 && !sad && !sleepy && !hungry && !dirty;
+
+  if (hungry) {
+    els.cat.classList.add("cat-hungry");
   }
 
-  els.cat.classList.add("happy");
+  if (dirty) {
+    els.cat.classList.add("cat-dirty");
+  }
+
+  if (sleepy) {
+    els.cat.classList.add("cat-sleepy", "sleepy");
+  }
+
+  if (sad) {
+    els.cat.classList.add("cat-sad", "sad");
+  } else if (happy) {
+    els.cat.classList.add("cat-happy", "happy");
+  }
 }
 
 function renderDecor() {
