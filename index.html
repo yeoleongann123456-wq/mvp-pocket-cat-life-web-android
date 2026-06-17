@@ -139,13 +139,6 @@
       <section class="stats-grid" aria-label="Cat stats">
         <article class="stat-card">
           <div class="stat-row">
-            <span>Hunger</span>
-            <strong id="hungerValue">100</strong>
-          </div>
-          <div class="bar"><span id="hungerBar"></span></div>
-        </article>
-        <article class="stat-card">
-          <div class="stat-row">
             <span>Happiness</span>
             <strong id="happinessValue">100</strong>
           </div>
@@ -153,10 +146,10 @@
         </article>
         <article class="stat-card">
           <div class="stat-row">
-            <span>Cleanliness</span>
-            <strong id="cleanlinessValue">100</strong>
+            <span>Hunger</span>
+            <strong id="hungerValue">100</strong>
           </div>
-          <div class="bar"><span id="cleanlinessBar"></span></div>
+          <div class="bar"><span id="hungerBar"></span></div>
         </article>
         <article class="stat-card">
           <div class="stat-row">
@@ -164,6 +157,13 @@
             <strong id="energyValue">100</strong>
           </div>
           <div class="bar"><span id="energyBar"></span></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-row">
+            <span>Cleanliness</span>
+            <strong id="cleanlinessValue">100</strong>
+          </div>
+          <div class="bar"><span id="cleanlinessBar"></span></div>
         </article>
       </section>
 
@@ -231,9 +231,16 @@
         <div class="section-heading">
           <div>
             <span class="label">Shop</span>
-            <h2>Cozy Decor</h2>
+            <h2>Cozy Market</h2>
           </div>
           <button id="resetButton" class="ghost-button">Reset</button>
+        </div>
+        <div id="shopCategories" class="shop-categories" aria-label="Shop categories">
+          <button class="active" data-shop-category="all">All</button>
+          <button data-shop-category="food">Food</button>
+          <button data-shop-category="toys">Toys</button>
+          <button data-shop-category="decor">Decor</button>
+          <button data-shop-category="collar">Collar</button>
         </div>
         <div id="shopList" class="shop-list"></div>
       </section>

@@ -4,7 +4,7 @@ Pocket Cat Life is a cozy virtual pet MVP built with plain HTML, CSS, and JavaSc
 
 Version 5 adds the Cat Action Animation System. Mochi now reacts with CSS animations when the player feeds, pets, cleans, plays, sleeps, or works.
 
-Version 5 visual polish also pushes the Home screen closer to a 3D mobile pet game: darker app shell, warm 3D room styling, round action buttons, a larger glossy cat, and stronger shadows/highlights.
+Version 5 visual polish now rebuilds the main experience as a mobile game UI: a warm 3D-style room scene, a larger glossy toy-like cat, dark glass stat HUD, circular 3D action buttons, a game-style bottom tab bar, pastel task/shop/diary/bag screens, and shop categories for Food, Toys, Decor, and Collar items.
 
 ## How to Run
 
@@ -64,6 +64,26 @@ On a real phone, host the folder on HTTPS or access a development server from th
   - Sleepy: half-closed eyes
   - Happy: bouncier idle and faster tail
   - Sad: lowered head and sad mouth
+
+## Version 5 Mobile Game UI
+
+- Home screen:
+  - Top HUD shows coins, bond level, growth stage, and bond progress.
+  - Central 3D-style room includes a window, sunlight, curtains, rug, cat bed, wood floor, dresser, plant, and wall decor.
+  - Mochi is rebuilt with layered CSS pieces, gradients, highlights, shadows, blush, paws, tail, collar, and action props.
+  - Stats are shown in a dark glass card with colored progress bars.
+  - Feed, Pet, Play, Sleep, Clean, and Work use circular 3D icon buttons with press bounce.
+- Tasks screen:
+  - Daily check-in, daily tasks, and achievements use warm pastel cards.
+  - Daily tasks include progress bars and clear reward buttons.
+- Shop screen:
+  - Cozy Market categories: All, Food, Toys, Decor, Collar.
+  - Food purchases add items to the bag.
+  - Decor/collar purchases keep using the existing room ownership system.
+- Diary screen:
+  - Recent mood entries are displayed as cream/pink diary cards with a cat avatar.
+- Bag screen:
+  - Inventory is displayed as a two-column game item grid with rarity styling.
 
 ## Animation Class Names
 

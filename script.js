@@ -199,12 +199,23 @@ const lotteryPrizes = [
 
 const shopItems = [
   {
+    id: "snack_pack",
+    name: "Snack Pack",
+    description: "Adds a warm snack to your bag.",
+    cost: 24,
+    unlockLevel: 1,
+    icon: "Snack",
+    category: "food",
+    inventoryItem: "food_snack"
+  },
+  {
     id: "bed",
     name: "Soft Cat Bed",
     description: "A cozy bed for slow afternoons.",
     cost: 45,
     unlockLevel: 1,
-    icon: "B"
+    icon: "Bed",
+    category: "decor"
   },
   {
     id: "toy",
@@ -212,7 +223,8 @@ const shopItems = [
     description: "A tiny toy for brighter moods.",
     cost: 70,
     unlockLevel: 2,
-    icon: "Y"
+    icon: "Yarn",
+    category: "toys"
   },
   {
     id: "collar",
@@ -220,7 +232,8 @@ const shopItems = [
     description: "A gentle ribbon with a bell.",
     cost: 95,
     unlockLevel: 3,
-    icon: "R"
+    icon: "Bell",
+    category: "collar"
   },
   {
     id: "decor",
@@ -228,7 +241,8 @@ const shopItems = [
     description: "Makes the room feel loved.",
     cost: 130,
     unlockLevel: 4,
-    icon: "F"
+    icon: "Bloom",
+    category: "decor"
   },
   {
     id: "sunset",
@@ -236,13 +250,15 @@ const shopItems = [
     description: "Warm light for peaceful evenings.",
     cost: 170,
     unlockLevel: 5,
-    icon: "S"
+    icon: "Sun",
+    category: "decor"
   }
 ];
 
 let state = loadState();
 let catActionTimer = null;
 let sleepRecoveryTimer = null;
+let activeShopCategory = "all";
 
 const els = {
   coinsText: document.getElementById("coinsText"),
@@ -254,6 +270,7 @@ const els = {
   cat: document.getElementById("cat"),
   room: document.getElementById("room"),
   shopList: document.getElementById("shopList"),
+  shopCategories: document.getElementById("shopCategories"),
   dailyDate: document.getElementById("dailyDate"),
   dailyTaskList: document.getElementById("dailyTaskList"),
   checkinStreak: document.getElementById("checkinStreak"),
@@ -303,6 +320,13 @@ document.querySelectorAll("[data-tab]").forEach((button) => {
 
 document.querySelectorAll("[data-action]").forEach((button) => {
   button.addEventListener("click", () => performAction(button.dataset.action));
+});
+
+document.querySelectorAll("[data-shop-category]").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeShopCategory = button.dataset.shopCategory;
+    renderShop();
+  });
 });
 
 els.resetButton.addEventListener("click", () => {
@@ -773,7 +797,8 @@ function buyItem(itemId) {
   const item = shopItems.find((entry) => entry.id === itemId);
   if (!item) return;
 
-  if (state.owned.includes(item.id)) {
+  const isInventoryPurchase = Boolean(item.inventoryItem);
+  if (!isInventoryPurchase && state.owned.includes(item.id)) {
     setMessage(`${item.name} is already in Mochi's room.`);
     return;
   }
@@ -793,12 +818,21 @@ function buyItem(itemId) {
   }
 
   state.coins -= item.cost;
-  state.owned.push(item.id);
+  if (isInventoryPurchase) {
+    addInventoryItem(item.inventoryItem, 1);
+  } else {
+    state.owned.push(item.id);
+  }
   gainBond(6);
-  setMessage(`${item.name} makes the room feel warmer.`);
+  setMessage(isInventoryPurchase
+    ? `${item.name} was packed into your bag.`
+    : `${item.name} makes the room feel warmer.`);
   checkAchievements();
   saveState();
   render();
+  if (isInventoryPurchase) {
+    showToast(`${item.name} added to Bag`);
+  }
 }
 
 function checkAchievements() {
@@ -1007,8 +1041,11 @@ function renderDiary() {
     const row = document.createElement("article");
     row.className = "diary-item";
     row.innerHTML = `
-      <span>${formatShortDate(entry.date)}</span>
-      <p>${entry.text}</p>
+      <div class="diary-avatar" aria-hidden="true"></div>
+      <div>
+        <span>${formatShortDate(entry.date)}</span>
+        <p>${entry.text}</p>
+      </div>
     `;
     els.diaryList.appendChild(row);
   });
@@ -1035,6 +1072,7 @@ function renderInventory() {
     const row = document.createElement("article");
     row.className = `inventory-item ${item.rarity.toLowerCase().replaceAll(" ", "-")}`;
     row.innerHTML = `
+      <div class="inventory-icon" aria-hidden="true">${item.type}</div>
       <div class="inventory-copy">
         <strong>${item.name} x${count}</strong>
         <span>${item.rarity} ${item.type} - ${item.description}</span>
@@ -1048,14 +1086,21 @@ function renderInventory() {
 
 function renderShop() {
   els.shopList.innerHTML = "";
+  document.querySelectorAll("[data-shop-category]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.shopCategory === activeShopCategory);
+  });
 
-  shopItems.forEach((item) => {
-    const owned = state.owned.includes(item.id);
+  const visibleItems = shopItems.filter((item) =>
+    activeShopCategory === "all" || item.category === activeShopCategory
+  );
+
+  visibleItems.forEach((item) => {
+    const owned = !item.inventoryItem && state.owned.includes(item.id);
     const locked = state.level < item.unlockLevel;
     const row = document.createElement("article");
-    row.className = "shop-item";
+    row.className = `shop-item shop-${item.category}`;
 
-    const buttonText = owned ? "Owned" : locked ? `Lv ${item.unlockLevel}` : `${item.cost} C`;
+    const buttonText = owned ? "Owned" : locked ? `Lv ${item.unlockLevel}` : `Buy ${item.cost} C`;
     const buttonClass = owned ? "owned" : locked ? "locked" : "";
     const detail = locked
       ? `Unlocks at Bond Level ${item.unlockLevel}`
@@ -1065,6 +1110,7 @@ function renderShop() {
       <div class="shop-icon" aria-hidden="true">${item.icon}</div>
       <div class="shop-copy">
         <strong>${item.name}</strong>
+        <em>${item.category}</em>
         <span>${detail}</span>
       </div>
       <button class="shop-button ${buttonClass}" ${owned ? "disabled" : ""}>${buttonText}</button>
