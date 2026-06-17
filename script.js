@@ -71,8 +71,27 @@ const defaultState = {
   },
   diaryEntries: [],
   inventory: {},
-  lastDiaryDate: ""
+  lastDiaryDate: "",
+  catName: "Mochi",
+  namePrompted: false,
+  tutorialComplete: false,
+  soundMuted: false
 };
+
+const tutorialSteps = [
+  {
+    title: "Welcome to Pocket Cat Life",
+    text: "This is your cozy room. Care for your cat a little each day and your bond will grow."
+  },
+  {
+    title: "Feed and Pet",
+    text: "Use Feed when hunger is low, and Pet when your cat needs warmth and happiness."
+  },
+  {
+    title: "Daily Tasks",
+    text: "Open Tasks to finish today's care list. Claim rewards to decorate and play longer."
+  }
+];
 
 const checkinRewards = [
   { day: 1, coins: 20, label: "20 C" },
@@ -259,13 +278,20 @@ let state = loadState();
 let catActionTimer = null;
 let sleepRecoveryTimer = null;
 let activeShopCategory = "all";
+let tutorialStepIndex = 0;
+let audioContext = null;
 
 const els = {
+  catNameTitle: document.getElementById("catNameTitle"),
   coinsText: document.getElementById("coinsText"),
   levelText: document.getElementById("levelText"),
   stageText: document.getElementById("stageText"),
   bondText: document.getElementById("bondText"),
   bondProgress: document.getElementById("bondProgress"),
+  moodStatus: document.getElementById("moodStatus"),
+  moodCopy: document.getElementById("moodCopy"),
+  dailyGoalText: document.getElementById("dailyGoalText"),
+  dailyGoalBar: document.getElementById("dailyGoalBar"),
   statusMessage: document.getElementById("statusMessage"),
   cat: document.getElementById("cat"),
   room: document.getElementById("room"),
@@ -289,7 +315,25 @@ const els = {
   eventText: document.getElementById("eventText"),
   eventButton: document.getElementById("eventButton"),
   toast: document.getElementById("toast"),
+  floatingLayer: document.getElementById("floatingLayer"),
   resetButton: document.getElementById("resetButton"),
+  catNameInput: document.getElementById("catNameInput"),
+  soundToggleButton: document.getElementById("soundToggleButton"),
+  saveSettingsButton: document.getElementById("saveSettingsButton"),
+  settingsResetButton: document.getElementById("settingsResetButton"),
+  tutorialModal: document.getElementById("tutorialModal"),
+  tutorialStepLabel: document.getElementById("tutorialStepLabel"),
+  tutorialTitle: document.getElementById("tutorialTitle"),
+  tutorialText: document.getElementById("tutorialText"),
+  tutorialProgress: document.querySelector(".tutorial-progress"),
+  skipTutorialButton: document.getElementById("skipTutorialButton"),
+  nextTutorialButton: document.getElementById("nextTutorialButton"),
+  nameModal: document.getElementById("nameModal"),
+  firstNameInput: document.getElementById("firstNameInput"),
+  confirmNameButton: document.getElementById("confirmNameButton"),
+  levelUpModal: document.getElementById("levelUpModal"),
+  levelUpText: document.getElementById("levelUpText"),
+  closeLevelUpButton: document.getElementById("closeLevelUpButton"),
   catBed: document.getElementById("catBed"),
   catToy: document.getElementById("catToy"),
   collar: document.getElementById("collar"),
@@ -315,37 +359,57 @@ const els = {
 };
 
 document.querySelectorAll("[data-tab]").forEach((button) => {
-  button.addEventListener("click", () => switchTab(button.dataset.tab));
+  button.addEventListener("click", () => {
+    playSound("click");
+    switchTab(button.dataset.tab);
+  });
 });
 
 document.querySelectorAll("[data-action]").forEach((button) => {
-  button.addEventListener("click", () => performAction(button.dataset.action));
+  button.addEventListener("click", () => {
+    playSound("click");
+    performAction(button.dataset.action);
+  });
 });
 
 document.querySelectorAll("[data-shop-category]").forEach((button) => {
   button.addEventListener("click", () => {
+    playSound("click");
     activeShopCategory = button.dataset.shopCategory;
     renderShop();
   });
 });
 
-els.resetButton.addEventListener("click", () => {
-  const shouldReset = confirm("Reset Pocket Cat Life and start again?");
-  if (!shouldReset) return;
-  state = createFreshState();
-  saveState();
-  render();
+els.resetButton.addEventListener("click", resetGameWithDoubleConfirm);
+els.settingsResetButton.addEventListener("click", resetGameWithDoubleConfirm);
+els.eventButton.addEventListener("click", () => {
+  playSound("click");
+  resolveActiveEvent();
 });
-
-els.eventButton.addEventListener("click", resolveActiveEvent);
-els.checkinButton.addEventListener("click", claimCheckin);
-els.drawButton.addEventListener("click", drawLottery);
+els.checkinButton.addEventListener("click", () => {
+  playSound("click");
+  claimCheckin();
+});
+els.drawButton.addEventListener("click", () => {
+  playSound("click");
+  drawLottery();
+});
+els.soundToggleButton.addEventListener("click", toggleSound);
+els.saveSettingsButton.addEventListener("click", saveSettings);
+els.skipTutorialButton.addEventListener("click", completeTutorial);
+els.nextTutorialButton.addEventListener("click", nextTutorialStep);
+els.confirmNameButton.addEventListener("click", confirmFirstName);
+els.closeLevelUpButton.addEventListener("click", () => {
+  playSound("click");
+  toggle(els.levelUpModal, false);
+});
 
 ensureCheckinState();
 ensureDiaryEntry();
 checkAchievements();
 saveState();
 render();
+startFirstRunFlow();
 registerServiceWorker();
 setInterval(tick, 6000);
 
@@ -374,6 +438,10 @@ function createFreshState() {
   fresh.nextEventAt = Date.now() + EVENT_INTERVAL_MS;
   fresh.diaryEntries = [];
   fresh.inventory = {};
+  fresh.catName = "Mochi";
+  fresh.namePrompted = false;
+  fresh.tutorialComplete = false;
+  fresh.soundMuted = false;
   return fresh;
 }
 
@@ -395,7 +463,13 @@ function migrateState(savedState) {
     },
     diaryEntries: Array.isArray(savedState.diaryEntries) ? savedState.diaryEntries : [],
     inventory: savedState.inventory && typeof savedState.inventory === "object" ? savedState.inventory : {},
-    lastDiaryDate: savedState.lastDiaryDate || ""
+    lastDiaryDate: savedState.lastDiaryDate || "",
+    catName: typeof savedState.catName === "string" && savedState.catName.trim()
+      ? savedState.catName.trim().slice(0, 18)
+      : "Mochi",
+    namePrompted: Boolean(savedState.namePrompted),
+    tutorialComplete: Boolean(savedState.tutorialComplete),
+    soundMuted: Boolean(savedState.soundMuted)
   };
 
   if (!Array.isArray(migrated.dailyTasks)) {
@@ -449,6 +523,7 @@ function applyOfflineDecay(targetState, elapsedMinutes) {
 }
 
 function performAction(action) {
+  const before = snapshotCoreState();
   const actions = {
     feed: () => {
       if (state.coins < 8) return failAction("You need 8 coins to buy a snack.");
@@ -498,6 +573,8 @@ function performAction(action) {
     incrementActionProgress(action);
     updateTodayDiary(action);
     checkAchievements();
+    playActionSound(action, before);
+    showActionFeedback(action, before);
   }
 
   saveState();
@@ -512,6 +589,8 @@ function performAction(action) {
 
 function failAction(message) {
   setMessage(message);
+  playSound("deny");
+  showFloatingText("Not yet", "warn");
   return false;
 }
 
@@ -531,6 +610,9 @@ function claimDailyTask(taskId) {
 
   task.claimed = true;
   state.coins += task.reward;
+  playSound("coin");
+  showFloatingText(`+${task.reward} coins`, "coin");
+  showCoinFly();
   gainBond(4);
   setMessage(`Daily task complete: ${task.reward} coins earned.`);
   showToast(`Daily reward claimed: ${task.reward} coins`);
@@ -558,6 +640,9 @@ function claimCheckin() {
   const rewardIndex = Math.max(0, Math.min(6, state.checkin.streak - 1));
   const reward = checkinRewards[rewardIndex];
   state.coins += reward.coins;
+  playSound("coin");
+  showFloatingText(`+${reward.coins} check-in`, "coin");
+  showCoinFly();
 
   if (reward.itemId) {
     addInventoryItem(reward.itemId, 1);
@@ -673,7 +758,9 @@ function resolveActiveEvent() {
   const event = randomEvents.find((entry) => entry.id === state.activeEvent.id);
   if (!event) return;
 
+  const before = snapshotCoreState();
   event.apply();
+  showCoinDelta(before);
   state.activeEvent = null;
   checkAchievements();
   saveState();
@@ -694,6 +781,9 @@ function drawLottery() {
 
   if (prize.kind === "coins") {
     state.coins += prize.coins;
+    playSound("coin");
+    showFloatingText(`+${prize.coins} coins`, "coin");
+    showCoinFly();
     els.drawResult.textContent = `${prize.rarity}: ${prize.name} gave ${prize.coins} coins.`;
     setMessage(`Lucky draw: ${prize.coins} coins came back to you.`);
   } else {
@@ -740,22 +830,30 @@ function useInventoryItem(itemId) {
     consumeInventoryItem(itemId);
     incrementActionProgress("feed");
     setMessage("Mochi enjoyed a snack from your bag.");
+    playSound("feed");
+    showFloatingText("+Hunger", "stat");
     triggerCatAction("feed");
   } else if (itemId === "toy_mouse") {
     adjustStats({ happiness: 14, energy: -4 });
     consumeInventoryItem(itemId);
     incrementActionProgress("play");
     setMessage("Mochi played with the tiny mouse toy.");
+    playSound("pet");
+    showFloatingText("+Happiness", "stat");
     triggerCatAction("play");
   } else if (itemId === "rare_collar") {
     if (!state.owned.includes("collar")) state.owned.push("collar");
     consumeInventoryItem(itemId);
     setMessage("Mochi is wearing the rare Moonbell Collar.");
+    playSound("pet");
+    showFloatingText("Equipped", "stat");
     triggerCatAction("pet");
   } else if (itemId === "decor_cloud") {
     if (!state.owned.includes("decor")) state.owned.push("decor");
     consumeInventoryItem(itemId);
     setMessage("You placed the Cloud Cushion near Mochi's cozy corner.");
+    playSound("click");
+    showFloatingText("Decor placed", "stat");
     triggerCatAction("clean");
   } else {
     setMessage(`${item.name} is safe in your bag for now.`);
@@ -790,6 +888,10 @@ function gainBond(amount) {
     state.coins += 35;
     setMessage(`Bond level up! Mochi trusts you even more. Level ${state.level} unlocked.`);
     showToast(`Bond Level ${state.level} reached`);
+    playSound("level");
+    showFloatingText("Level Up!", "level");
+    showCoinFly();
+    showLevelUpModal();
   }
 }
 
@@ -830,6 +932,7 @@ function buyItem(itemId) {
   checkAchievements();
   saveState();
   render();
+  showFloatingText(`-${item.cost} coins`, "warn");
   if (isInventoryPurchase) {
     showToast(`${item.name} added to Bag`);
   }
@@ -886,6 +989,8 @@ function startSleepRecovery() {
 function render() {
   renderStats();
   renderCatMood();
+  renderMoodLine();
+  renderDailyGoal();
   renderDecor();
   renderCheckin();
   renderDailyTasks();
@@ -896,12 +1001,16 @@ function render() {
   renderInventory();
 
   const stage = getGrowthStage();
+  els.catNameTitle.textContent = state.catName;
   els.coinsText.textContent = state.coins;
   els.levelText.textContent = `Level ${state.level}`;
   els.stageText.textContent = `${stage.name} - ${stage.copy}`;
   els.bondText.textContent = `${state.bond} / 100`;
   els.bondProgress.style.width = `${state.bond}%`;
   els.statusMessage.textContent = state.message;
+  els.catNameInput.value = state.catName;
+  els.soundToggleButton.textContent = state.soundMuted ? "Sound Off" : "Sound On";
+  els.soundToggleButton.classList.toggle("muted", state.soundMuted);
 }
 
 function renderStats() {
@@ -911,6 +1020,66 @@ function renderStats() {
     statEls.bar.style.width = `${value}%`;
     statEls.bar.parentElement.dataset.level = value < 30 ? "low" : value < 65 ? "mid" : "high";
   });
+}
+
+function renderMoodLine() {
+  const mood = getCurrentMood();
+  els.moodStatus.textContent = mood.name;
+  els.moodCopy.textContent = mood.copy;
+}
+
+function renderDailyGoal() {
+  const total = state.dailyTasks.length || 3;
+  const completed = state.dailyTasks.filter((task) => task.claimed).length;
+  const progress = total ? Math.round((completed / total) * 100) : 0;
+  els.dailyGoalText.textContent = completed >= total
+    ? "All tasks completed today!"
+    : `${completed} / ${total} tasks`;
+  els.dailyGoalBar.style.width = `${progress}%`;
+}
+
+function getCurrentMood() {
+  const name = state.catName || "Mochi";
+
+  if (state.hunger < 30) {
+    return {
+      name: "Hungry",
+      copy: `${name} is looking at the food bowl with tiny hopeful eyes.`
+    };
+  }
+
+  if (state.energy < 28) {
+    return {
+      name: "Tired",
+      copy: `${name} wants a soft nap and a quiet room.`
+    };
+  }
+
+  if (state.cleanliness < 34) {
+    return {
+      name: "Dirty",
+      copy: `${name} has little dust spots and needs a gentle clean.`
+    };
+  }
+
+  if (state.happiness < 32 || lowestNeed() < 24) {
+    return {
+      name: "Sad",
+      copy: `${name} needs care, warmth, and a little patience.`
+    };
+  }
+
+  if (state.happiness >= 82 && state.hunger >= 70 && state.energy >= 58 && state.cleanliness >= 70) {
+    return {
+      name: "Very Happy",
+      copy: `${name} feels loved, safe, and bright today.`
+    };
+  }
+
+  return {
+    name: "Normal",
+    copy: `${name} is enjoying the quiet cozy room.`
+  };
 }
 
 function renderCatMood() {
@@ -986,11 +1155,12 @@ function renderDailyTasks() {
 
   state.dailyTasks.forEach((task) => {
     const complete = task.progress >= task.target;
+    const taskLabel = task.label.replace("Mochi", state.catName);
     const row = document.createElement("article");
     row.className = `daily-item ${task.claimed ? "claimed" : ""}`;
     row.innerHTML = `
       <div class="daily-copy">
-        <strong>${task.label}</strong>
+        <strong>${taskLabel}</strong>
         <span>${task.progress} / ${task.target} - Reward ${task.reward} C</span>
         <div class="mini-track"><div style="width: ${(task.progress / task.target) * 100}%"></div></div>
       </div>
@@ -999,7 +1169,10 @@ function renderDailyTasks() {
       </button>
     `;
 
-    row.querySelector("button").addEventListener("click", () => claimDailyTask(task.id));
+    row.querySelector("button").addEventListener("click", () => {
+      playSound("click");
+      claimDailyTask(task.id);
+    });
     els.dailyTaskList.appendChild(row);
   });
 }
@@ -1079,7 +1252,10 @@ function renderInventory() {
       </div>
       <button class="inventory-button">${item.action}</button>
     `;
-    row.querySelector("button").addEventListener("click", () => useInventoryItem(itemId));
+    row.querySelector("button").addEventListener("click", () => {
+      playSound("click");
+      useInventoryItem(itemId);
+    });
     els.inventoryList.appendChild(row);
   });
 }
@@ -1118,7 +1294,10 @@ function renderShop() {
 
     const button = row.querySelector("button");
     if (!owned) {
-      button.addEventListener("click", () => buyItem(item.id));
+      button.addEventListener("click", () => {
+        playSound("click");
+        buyItem(item.id);
+      });
     }
 
     els.shopList.appendChild(row);
@@ -1144,6 +1323,226 @@ function getGrowthStage() {
     name: "Adult Cat",
     copy: "calm, loyal, deeply bonded"
   };
+}
+
+function snapshotCoreState() {
+  return {
+    coins: state.coins,
+    hunger: state.hunger,
+    happiness: state.happiness,
+    cleanliness: state.cleanliness,
+    energy: state.energy
+  };
+}
+
+function showActionFeedback(action, before) {
+  const labels = {
+    feed: "+Hunger",
+    pet: "+Happiness",
+    clean: "+Clean",
+    sleep: "+Energy",
+    play: "+Fun",
+    work: "+Coins"
+  };
+
+  showFloatingText(labels[action] || "Nice", action === "work" ? "coin" : "stat");
+  showCoinDelta(before);
+}
+
+function showCoinDelta(before) {
+  const delta = state.coins - before.coins;
+  if (!delta) return;
+
+  showFloatingText(`${delta > 0 ? "+" : ""}${delta} coins`, delta > 0 ? "coin" : "warn");
+  if (delta > 0) {
+    playSound("coin");
+    showCoinFly();
+  }
+}
+
+function showFloatingText(text, type = "stat") {
+  const node = document.createElement("div");
+  node.className = `floating-text ${type}`;
+  node.textContent = text;
+  node.style.left = `${randomInt(28, 72)}%`;
+  node.style.top = `${randomInt(28, 58)}%`;
+  els.floatingLayer.appendChild(node);
+  window.setTimeout(() => node.remove(), 1200);
+}
+
+function showCoinFly() {
+  for (let i = 0; i < 5; i += 1) {
+    const node = document.createElement("span");
+    node.className = "flying-coin";
+    node.textContent = "C";
+    node.style.left = `${randomInt(42, 58)}%`;
+    node.style.top = `${randomInt(52, 68)}%`;
+    node.style.setProperty("--coin-x", `${randomInt(-70, 70)}px`);
+    node.style.animationDelay = `${i * 55}ms`;
+    els.floatingLayer.appendChild(node);
+    window.setTimeout(() => node.remove(), 980);
+  }
+}
+
+function playActionSound(action, before) {
+  if (action === "feed") {
+    playSound("feed");
+  } else if (action === "pet" || action === "play") {
+    playSound("pet");
+  } else if (state.coins > before.coins) {
+    playSound("coin");
+  } else {
+    playSound("click");
+  }
+}
+
+function playSound(type) {
+  if (state.soundMuted) return;
+
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextCtor) return;
+
+  if (!audioContext) {
+    audioContext = new AudioContextCtor();
+  }
+
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+
+  const now = audioContext.currentTime;
+  const master = audioContext.createGain();
+  master.gain.setValueAtTime(0.0001, now);
+  master.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
+  master.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+  master.connect(audioContext.destination);
+
+  const patterns = {
+    click: [520, 0.06, "triangle"],
+    feed: [190, 0.16, "sine"],
+    pet: [660, 0.18, "sine"],
+    coin: [880, 0.14, "square"],
+    level: [523, 0.28, "triangle"],
+    deny: [120, 0.12, "sawtooth"]
+  };
+
+  const [baseFrequency, duration, wave] = patterns[type] || patterns.click;
+  const osc = audioContext.createOscillator();
+  osc.type = wave;
+  osc.frequency.setValueAtTime(baseFrequency, now);
+
+  if (type === "pet" || type === "level") {
+    osc.frequency.exponentialRampToValueAtTime(baseFrequency * 1.5, now + duration);
+  }
+
+  if (type === "coin") {
+    osc.frequency.exponentialRampToValueAtTime(baseFrequency * 1.22, now + duration);
+  }
+
+  osc.connect(master);
+  osc.start(now);
+  osc.stop(now + duration);
+}
+
+function startFirstRunFlow() {
+  if (!state.namePrompted) {
+    els.firstNameInput.value = state.catName || "Mochi";
+    toggle(els.nameModal, true);
+    return;
+  }
+
+  if (!state.tutorialComplete) {
+    showTutorialStep(0);
+  }
+}
+
+function confirmFirstName() {
+  const name = sanitizeCatName(els.firstNameInput.value);
+  state.catName = name;
+  state.namePrompted = true;
+  setMessage(`${state.catName} is happy to meet you.`);
+  saveState();
+  render();
+  toggle(els.nameModal, false);
+  if (!state.tutorialComplete) {
+    showTutorialStep(0);
+  }
+}
+
+function showTutorialStep(index) {
+  tutorialStepIndex = Math.max(0, Math.min(tutorialSteps.length - 1, index));
+  const step = tutorialSteps[tutorialStepIndex];
+  els.tutorialStepLabel.textContent = `Step ${tutorialStepIndex + 1} / ${tutorialSteps.length}`;
+  els.tutorialTitle.textContent = step.title;
+  els.tutorialText.textContent = step.text;
+  els.nextTutorialButton.textContent = tutorialStepIndex === tutorialSteps.length - 1 ? "Finish" : "Next";
+  els.tutorialProgress.querySelectorAll("span").forEach((dot, dotIndex) => {
+    dot.classList.toggle("active", dotIndex <= tutorialStepIndex);
+  });
+  toggle(els.tutorialModal, true);
+}
+
+function nextTutorialStep() {
+  playSound("click");
+  if (tutorialStepIndex >= tutorialSteps.length - 1) {
+    completeTutorial();
+    return;
+  }
+  showTutorialStep(tutorialStepIndex + 1);
+}
+
+function completeTutorial() {
+  playSound("click");
+  state.tutorialComplete = true;
+  saveState();
+  toggle(els.tutorialModal, false);
+  showToast("Tutorial complete");
+}
+
+function toggleSound() {
+  state.soundMuted = !state.soundMuted;
+  saveState();
+  render();
+  if (!state.soundMuted) {
+    playSound("pet");
+  }
+}
+
+function saveSettings() {
+  playSound("click");
+  state.catName = sanitizeCatName(els.catNameInput.value);
+  state.namePrompted = true;
+  setMessage(`${state.catName}'s room feels personal and safe.`);
+  saveState();
+  render();
+  showToast("Settings saved");
+}
+
+function sanitizeCatName(value) {
+  const trimmed = String(value || "").trim().replace(/\s+/g, " ");
+  return trimmed ? trimmed.slice(0, 18) : "Mochi";
+}
+
+function resetGameWithDoubleConfirm() {
+  playSound("deny");
+  const first = confirm("Reset Pocket Cat Life? This will clear this browser's save data.");
+  if (!first) return;
+  const second = confirm("Are you sure? Coins, decor, tasks, diary, bag, tutorial, and name will reset.");
+  if (!second) return;
+
+  localStorage.removeItem(STORAGE_KEY);
+  state = createFreshState();
+  activeShopCategory = "all";
+  saveState();
+  render();
+  toggle(els.levelUpModal, false);
+  toggle(els.tutorialModal, false);
+  startFirstRunFlow();
+}
+
+function showLevelUpModal() {
+  els.levelUpText.textContent = `${state.catName} reached Bond Level ${state.level}. You earned 35 bonus coins.`;
+  toggle(els.levelUpModal, true);
 }
 
 function showToast(message) {

@@ -2,7 +2,7 @@
 
 Pocket Cat Life is a cozy virtual pet MVP built with plain HTML, CSS, and JavaScript. You care for Mochi the cat, earn coins, decorate the room, complete daily tasks, unlock achievements, install it as a PWA, and build a long-term bond over time.
 
-Version 5 adds the Cat Action Animation System. Mochi now reacts with CSS animations when the player feeds, pets, cleans, plays, sleeps, or works.
+Version 6 adds game-feel and retention systems: first-run tutorial, cat naming, mood status, sound effects, stronger floating feedback, level-up celebration, a home daily-goal tracker, and a Settings page.
 
 Version 5 visual polish now rebuilds the main experience as a mobile game UI: a warm 3D-style room scene, a larger glossy toy-like cat, dark glass stat HUD, circular 3D action buttons, a game-style bottom tab bar, pastel task/shop/diary/bag screens, and shop categories for Food, Toys, Decor, and Collar items.
 
@@ -23,6 +23,79 @@ http://localhost:8080
 ```
 
 On a real phone, host the folder on HTTPS or access a development server from the same network. Service workers do not register from plain `file://` pages.
+
+## Version 6 Game Feel + Retention
+
+- First-run tutorial:
+  - Step 1 welcomes the player.
+  - Step 2 teaches Feed and Pet.
+  - Step 3 points players to Daily Tasks.
+  - Tutorial can be skipped and is saved in `localStorage`.
+- Cat naming:
+  - First launch asks for a cat name.
+  - Default name is `Mochi`.
+  - The name appears on the Home screen and in mood/task text.
+  - Settings allows renaming later.
+- Mood system:
+  - Home displays one current mood: Very Happy, Normal, Hungry, Tired, Dirty, or Sad.
+  - Mood copy updates from Hunger, Happiness, Energy, and Cleanliness.
+- Sound effects:
+  - Web Audio API creates lightweight sounds without external files.
+  - Click, feed, pet/play, coin, level-up, and deny sounds are supported.
+  - Settings includes mute/unmute.
+- Stronger feedback:
+  - Actions show floating text.
+  - Coin gains show flying coin animation.
+  - Status and bond bars remain smoothly animated.
+  - Level up opens a celebration modal.
+- Daily goal:
+  - Home shows daily task completion progress.
+  - When all tasks are claimed, it shows `All tasks completed today!`.
+- Settings:
+  - Rename cat.
+  - Toggle sound.
+  - Reset game with two confirmations.
+
+## localStorage Save Data
+
+All save data is stored under:
+
+```text
+pocketCatLifeSave
+```
+
+The saved object includes:
+
+- Core stats: `hunger`, `happiness`, `cleanliness`, `energy`
+- Progression: `bond`, `level`, `coins`, `owned`
+- Daily systems: `dailyDate`, `dailyTasks`, `checkin`
+- Counters and unlocks: `counters`, `achievements`
+- Events: `activeEvent`, `nextEventAt`
+- Diary and bag: `diaryEntries`, `lastDiaryDate`, `inventory`
+- Version 6 fields: `catName`, `namePrompted`, `tutorialComplete`, `soundMuted`
+- Save timing: `lastSaved`
+
+Existing saves migrate automatically. The storage key stays the same, so Version 1-5 saves are preserved.
+
+## Testing Version 6
+
+- Tutorial/name flow:
+  - Open DevTools.
+  - Run `localStorage.removeItem("pocketCatLifeSave")`.
+  - Reload the page.
+  - The name modal should appear first, followed by the 3-step tutorial.
+- Reset:
+  - Open Settings.
+  - Tap `Reset Game`.
+  - Confirm both browser dialogs.
+  - The name modal and tutorial should return.
+- Sound:
+  - Open Settings.
+  - Toggle Sound Off and confirm buttons no longer play sounds.
+  - Toggle Sound On and tap Feed/Pet/Work to hear generated Web Audio effects.
+- Daily goal:
+  - Complete and claim all three daily tasks.
+  - Home should show `All tasks completed today!`.
 
 ## Version 5 Cat Action Animation System
 
@@ -176,7 +249,7 @@ On a real phone, host the folder on HTTPS or access a development server from th
 - It is still a website, but it can feel close to an app when launched from the home screen.
 - After the first successful online load, the game can open offline from the same installed PWA.
 - Save data still uses the same `localStorage` key: `pocketCatLifeSave`.
-- Existing Version 1, Version 2, and Version 3 saves are preserved.
+- Existing Version 1-6 saves are preserved through migration.
 
 ## Earlier Game Features
 
