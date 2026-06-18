@@ -22,7 +22,9 @@ const initialState: MochiState = {
   relationshipPoints: 0,
   healthLogs: {},
   tasks: [],
-  reminders: []
+  reminders: [],
+  stars: 120,
+  ownedItems: ["starter-rug"]
 };
 
 type MochiActions = {
@@ -31,6 +33,7 @@ type MochiActions = {
   updateBreed: (breedId: BreedId) => void;
   recordDailyReturn: () => void;
   addRelationship: (points: number) => void;
+  addStars: (stars: number) => void;
   getTodayLog: () => HealthLog;
   addWater: () => void;
   setSleep: (hours: number) => void;
@@ -40,6 +43,7 @@ type MochiActions = {
   toggleTask: (taskId: string) => void;
   addReminder: (input: { title: string; date: string; time: string; repeat: RepeatOption }) => void;
   toggleReminder: (reminderId: string) => void;
+  buyItem: (itemId: string, price: number) => boolean;
   setNotificationPreference: (value: MochiState["profile"]["notificationPreference"]) => void;
   resetMochi: () => void;
 };
@@ -103,6 +107,11 @@ export const useMochiStore = create<MochiStore>()(
           relationshipPoints: Math.max(0, state.relationshipPoints + points)
         }));
       },
+      addStars: (stars) => {
+        set((state) => ({
+          stars: Math.max(0, state.stars + stars)
+        }));
+      },
       getTodayLog: () => {
         const today = todayKey();
         return get().healthLogs[today] ?? DEFAULT_HEALTH_LOG(today);
@@ -118,7 +127,8 @@ export const useMochiStore = create<MochiStore>()(
               waterGlasses: Math.min(12, current.waterGlasses + 1)
             }
           },
-          relationshipPoints: state.relationshipPoints + 2
+          relationshipPoints: state.relationshipPoints + 2,
+          stars: state.stars + 3
         }));
       },
       setSleep: (hours) => {
@@ -132,7 +142,8 @@ export const useMochiStore = create<MochiStore>()(
               sleepHours: Math.max(0, Math.min(16, Number(hours) || 0))
             }
           },
-          relationshipPoints: state.relationshipPoints + 2
+          relationshipPoints: state.relationshipPoints + 2,
+          stars: state.stars + 2
         }));
       },
       setSteps: (steps) => {
@@ -159,7 +170,8 @@ export const useMochiStore = create<MochiStore>()(
               mood
             }
           },
-          relationshipPoints: state.relationshipPoints + 3
+          relationshipPoints: state.relationshipPoints + 3,
+          stars: state.stars + 3
         }));
       },
       addTask: (title) => {
@@ -183,7 +195,8 @@ export const useMochiStore = create<MochiStore>()(
             tasks: state.tasks.map((task) =>
               task.id === taskId ? { ...task, completed: !task.completed } : task
             ),
-            relationshipPoints: state.relationshipPoints + (completing ? 3 : 0)
+            relationshipPoints: state.relationshipPoints + (completing ? 3 : 0),
+            stars: state.stars + (completing ? 5 : 0)
           };
         });
       },
@@ -209,6 +222,16 @@ export const useMochiStore = create<MochiStore>()(
           )
         }));
       },
+      buyItem: (itemId, price) => {
+        const state = get();
+        const ownedItems = state.ownedItems ?? [];
+        if (ownedItems.includes(itemId) || state.stars < price) return false;
+        set({
+          stars: state.stars - price,
+          ownedItems: [...ownedItems, itemId]
+        });
+        return true;
+      },
       setNotificationPreference: (value) => {
         set((state) => ({
           profile: {
@@ -222,7 +245,23 @@ export const useMochiStore = create<MochiStore>()(
     {
       name: "mochiCareSave",
       storage: createJSONStorage(() => localStorage),
-      version: 1
+      version: 2,
+      migrate: (persistedState) => {
+        const saved = persistedState as Partial<MochiState>;
+        return {
+          ...initialState,
+          ...saved,
+          profile: {
+            ...initialState.profile,
+            ...(saved.profile ?? {})
+          },
+          healthLogs: saved.healthLogs ?? {},
+          tasks: saved.tasks ?? [],
+          reminders: saved.reminders ?? [],
+          stars: typeof saved.stars === "number" ? saved.stars : initialState.stars,
+          ownedItems: Array.isArray(saved.ownedItems) ? saved.ownedItems : initialState.ownedItems
+        } as MochiStore;
+      }
     }
   )
 );

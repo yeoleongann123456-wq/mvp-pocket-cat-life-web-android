@@ -37,6 +37,11 @@ function copyLegacyPwaFiles() {
         copyFileSync(builtApp, builtIndex);
         copyFileSync(builtApp, resolve("index.html"));
       }
+
+      const builtAssets = resolve(distDir, "assets");
+      if (existsSync(builtAssets)) {
+        cpSync(builtAssets, resolve("assets"), { recursive: true });
+      }
     }
   };
 }

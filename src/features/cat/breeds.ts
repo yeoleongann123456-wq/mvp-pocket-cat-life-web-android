@@ -65,6 +65,19 @@ export const CAT_BREEDS: Record<BreedId, CatBreed> = {
     reminderTone: "bright and encouraging",
     dialogueStyle: "energetic little nudges",
     greeting: "Tiny paws, big plan. We take care of you today."
+  },
+  dragon: {
+    id: "dragon",
+    name: "Lucky Dragon Cat",
+    colors: {
+      primary: "#7dd3fc",
+      secondary: "#fff1a8",
+      accent: "#f472b6"
+    },
+    personality: "mythic, protective, celebratory",
+    reminderTone: "sparkly and reassuring",
+    dialogueStyle: "lucky blessings and proud encouragement",
+    greeting: "Your tiny luck dragon is awake. Let us protect your day."
   }
 };
 

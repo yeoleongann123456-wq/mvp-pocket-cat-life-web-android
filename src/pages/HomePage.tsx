@@ -1,4 +1,5 @@
-import { FiBell, FiMoon, FiSmile, FiTrendingUp } from "react-icons/fi";
+import { useState } from "react";
+import { FiBell, FiBriefcase, FiCoffee, FiHeart, FiMoon, FiSmile, FiSun, FiTrendingUp } from "react-icons/fi";
 import type { ReactNode } from "react";
 import { TbDropletHeart } from "react-icons/tb";
 import CatRoom from "../components/CatRoom";
@@ -11,7 +12,14 @@ export default function HomePage() {
   const profile = useMochiStore((state) => state.profile);
   const points = useMochiStore((state) => state.relationshipPoints);
   const getTodayLog = useMochiStore((state) => state.getTodayLog);
+  const addWater = useMochiStore((state) => state.addWater);
+  const setSleep = useMochiStore((state) => state.setSleep);
+  const addRelationship = useMochiStore((state) => state.addRelationship);
+  const addStars = useMochiStore((state) => state.addStars);
   const reminders = useMochiStore((state) => state.reminders);
+  const ownedItems = useMochiStore((state) => state.ownedItems ?? []);
+  const [action, setAction] = useState("idle");
+  const [floatingText, setFloatingText] = useState("");
   const breed = CAT_BREEDS[profile.breedId];
   const log = getTodayLog();
   const upcoming = reminders
@@ -28,9 +36,30 @@ export default function HomePage() {
         : "Tell me how your heart is doing when you are ready."
   }`;
 
+  function triggerAction(nextAction: string, text: string, effect: () => void) {
+    effect();
+    setAction(nextAction);
+    setFloatingText(text);
+    window.setTimeout(() => {
+      setAction("idle");
+      setFloatingText("");
+    }, 900);
+  }
+
   return (
     <section className="grid gap-4">
-      <CatRoom breed={breed} catName={profile.catName} />
+      <div className="sticky top-2 z-20 grid gap-2">
+        <CatRoom action={action} breed={breed} catName={profile.catName} compact expression={actionToExpression(action, log.waterGlasses)} ownedItems={ownedItems} />
+        {floatingText && <div className="pointer-events-none -mt-16 justify-self-center rounded-full bg-white/95 px-4 py-2 text-sm font-black text-[#49343a] shadow-xl">{floatingText}</div>}
+        <section className="action-scroll -mx-1 flex gap-2 overflow-x-auto rounded-[24px] bg-[#2a1c2d]/90 p-2 shadow-xl backdrop-blur">
+          <ActionButton icon={<FiCoffee />} label="Water" onClick={() => triggerAction("feed", "+Water +Bond +Stars", addWater)} />
+          <ActionButton icon={<FiHeart />} label="Pet" onClick={() => triggerAction("pet", "+Mood +Bond", () => addRelationship(2))} />
+          <ActionButton icon={<FiSun />} label="Play" onClick={() => triggerAction("play", "+Mood +Stars", () => { addRelationship(2); addStars(4); })} />
+          <ActionButton icon={<FiMoon />} label="Sleep" onClick={() => triggerAction("sleep", "+Rest +Bond", () => setSleep(8))} />
+          <ActionButton icon={<FiSmile />} label="Clean" onClick={() => triggerAction("clean", "+Care +Stars", () => { addRelationship(1); addStars(3); })} />
+          <ActionButton icon={<FiBriefcase />} label="Focus" onClick={() => triggerAction("work", "+Focus +Stars", () => { addRelationship(3); addStars(5); })} />
+        </section>
+      </div>
 
       <section className="rounded-[28px] border border-white/30 bg-white/80 p-4 shadow-xl backdrop-blur">
         <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">{breed.name} dialogue</p>
@@ -71,6 +100,24 @@ export default function HomePage() {
       </section>
     </section>
   );
+}
+
+function ActionButton({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
+  return (
+    <button className="action-button grid min-w-[70px] place-items-center gap-1 rounded-2xl bg-white/10 px-3 py-2 text-xs font-black text-white shadow-lg" onClick={onClick} type="button">
+      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-[#ff8dad] to-[#ffd45c] text-xl text-white shadow-inner">{icon}</span>
+      {label}
+    </button>
+  );
+}
+
+function actionToExpression(action: string, waterGlasses: number) {
+  if (action === "sleep") return "sleepy";
+  if (action === "work") return "proud";
+  if (action === "play" || action === "pet") return "excited";
+  if (action === "feed") return "happy";
+  if (waterGlasses < 2) return "hungry";
+  return "happy";
 }
 
 function SummaryCard({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {

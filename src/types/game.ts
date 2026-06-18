@@ -1,4 +1,4 @@
-export type BreedId = "orange" | "ragdoll" | "british" | "black" | "munchkin";
+export type BreedId = "orange" | "ragdoll" | "british" | "black" | "munchkin" | "dragon";
 
 export type RelationshipLevel = "Stranger" | "Friend" | "Best Friend" | "Family" | "Soul Companion";
 
@@ -53,10 +53,24 @@ export type Reminder = {
   createdAt: string;
 };
 
+export type ShopCategory = "Room" | "Furniture" | "Cat Bed" | "Rug" | "Window" | "Plants" | "Collar" | "Toys";
+
+export type ShopItem = {
+  id: string;
+  name: string;
+  category: ShopCategory;
+  price: number;
+  description: string;
+  preview: string;
+  afterPreview: string;
+};
+
 export type MochiState = {
   profile: UserProfile;
   relationshipPoints: number;
   healthLogs: Record<string, HealthLog>;
   tasks: CareTask[];
   reminders: Reminder[];
+  stars: number;
+  ownedItems: string[];
 };

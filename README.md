@@ -18,12 +18,24 @@ The original Pocket Cat Life prototype is preserved as `legacy-pocket-cat.html`,
   - British Shorthair
   - Black Cat
   - Munchkin
+  - Lucky Dragon Cat
   - Each breed has different colors, personality, reminder tone, and dialogue style
 - Home screen
-  - Cozy 3D-style room
-  - Chosen cat and cat name
+  - Sticky Pet Society-style cozy room, so the cat stays visible while actions are used
+  - Cute toy-like 3D CSS cat with breed colors, expressions, collar, tail, and reactions
+  - Chosen cat, cat name, relationship level, and stars
   - Relationship level
   - Today's care summary: Water, Sleep, Steps, Mood, Next Reminder
+- Game feel actions
+  - Compact icon actions near the cat: Water, Pet, Play, Sleep, Clean, Focus
+  - Floating reward text and animated cat reactions
+- Cat collection
+  - Locked and unlocked cat preview cards
+  - Unlock goals for Ragdoll, British Shorthair, Black Cat, Munchkin, and Lucky Dragon Cat
+  - Switch between unlocked cats
+- Shop preview
+  - Clear item cards with large preview, category, price, description, and before/after text
+  - Purchased room items appear inside the room, including rugs, plants, cat beds, toys, windows, shelves, and collars
 - Cat dialogue
   - Time-of-day greeting
   - Breed-aware caring tone
@@ -123,6 +135,8 @@ Stored data:
 - cat breed
 - cat name
 - relationship points
+- stars
+- owned shop items
 - health logs
 - tasks
 - reminders
@@ -185,6 +199,32 @@ Notes:
 - Some mobile browsers restrict scheduled web notifications.
 - If permission is denied, Mochi continues with in-app reminders.
 - Firebase Cloud Messaging structure exists, but production FCM credentials are not configured yet.
+
+## How to Test Cat Switching
+
+1. Open the `Cat` tab.
+2. Scroll to `Cat Collection`.
+3. The Orange Cat is unlocked by default.
+4. Tap `Use Cat` on any unlocked cat.
+5. Return to `Home`; the sticky room should immediately show the selected cat.
+6. Locked cats stay visible as faded preview cards with their unlock condition.
+
+Unlock examples:
+
+- Ragdoll: complete 3 days of health check-in.
+- British Shorthair: complete 10 tasks.
+- Black Cat: record care on 7 different days.
+- Munchkin: hit the water goal on 5 days.
+- Lucky Dragon Cat: build a long relationship streak.
+
+## How to Test Shop Preview
+
+1. Open the `Cat` tab.
+2. Use the category chips: `Room`, `Furniture`, `Cat Bed`, `Rug`, `Window`, `Plants`, `Collar`, `Toys`.
+3. Each item card shows a large preview, description, before/after effect, price, and status.
+4. Tap `Buy` if you have enough stars.
+5. Return to `Home`; bought room items should appear in the room.
+6. Buying the rose collar should make the cat wear it in the room.
 
 ## GitHub Pages Deployment
 

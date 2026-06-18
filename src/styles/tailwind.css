@@ -23,6 +23,28 @@ body {
     linear-gradient(180deg, #f8cfae 0 54%, #d99061 54% 56%, #b86f42 56% 100%);
 }
 
+.room-scene.room-compact {
+  min-height: 310px;
+}
+
+.grid .room-scene.room-compact {
+  min-height: 170px;
+}
+
+.grid .room-scene.room-compact .cat-toy-body {
+  transform: translateX(-50%) scale(0.55);
+  transform-origin: bottom center;
+}
+
+.sticky .room-scene.room-compact {
+  min-height: 305px;
+}
+
+.sticky .room-scene.room-compact .cat-toy-body {
+  transform: translateX(-50%) scale(0.9);
+  transform-origin: bottom center;
+}
+
 .room-scene::before {
   content: "";
   position: absolute;
