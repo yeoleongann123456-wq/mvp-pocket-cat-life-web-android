@@ -144,6 +144,12 @@ Start development server:
 pnpm dev
 ```
 
+Then open:
+
+```text
+http://localhost:5173/app.html
+```
+
 Build production files:
 
 ```bash
@@ -202,6 +208,8 @@ GitHub Pages should use:
 Branch: main
 Folder: /docs
 ```
+
+The build also copies the generated app shell to root `index.html` as a fallback for Pages cache/source changes.
 
 ## Capacitor
 

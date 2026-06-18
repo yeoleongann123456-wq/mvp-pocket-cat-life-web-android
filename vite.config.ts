@@ -30,6 +30,13 @@ function copyLegacyPwaFiles() {
       if (existsSync("icons")) {
         cpSync(resolve("icons"), resolve(distDir, "icons"), { recursive: true });
       }
+
+      const builtApp = resolve(distDir, "app.html");
+      const builtIndex = resolve(distDir, "index.html");
+      if (existsSync(builtApp)) {
+        copyFileSync(builtApp, builtIndex);
+        copyFileSync(builtApp, resolve("index.html"));
+      }
     }
   };
 }
@@ -41,7 +48,7 @@ export default defineConfig({
     outDir: "docs",
     rollupOptions: {
       input: {
-        app: "index.html"
+        app: "app.html"
       }
     }
   }

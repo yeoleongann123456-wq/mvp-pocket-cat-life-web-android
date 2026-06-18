@@ -1,0 +1,26 @@
+{
+  "name": "Mochi - The Cat That Cares",
+  "short_name": "Mochi",
+  "description": "A cozy wellness companion where a caring cat helps the user with health check-ins, tasks, and reminders.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff8ee",
+  "theme_color": "#fff1cf",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
