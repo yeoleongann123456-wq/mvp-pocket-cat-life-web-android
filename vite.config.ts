@@ -5,17 +5,18 @@ import { resolve } from "node:path";
 
 function copyLegacyPwaFiles() {
   const files = [
-    "style.css",
-    "script.js",
     "service-worker.js",
     "firebase-messaging-sw.js",
-    "manifest.json"
+    "manifest.json",
+    "legacy-pocket-cat.html",
+    "style.css",
+    "script.js"
   ];
 
   return {
     name: "copy-legacy-pwa-files",
     closeBundle() {
-      const distDir = resolve("dist");
+      const distDir = resolve("docs");
       if (!existsSync(distDir)) {
         mkdirSync(distDir, { recursive: true });
       }
@@ -37,10 +38,10 @@ export default defineConfig({
   base: "/mvp-pocket-cat-life-web-android/",
   plugins: [react(), copyLegacyPwaFiles()],
   build: {
+    outDir: "docs",
     rollupOptions: {
       input: {
-        legacy: "index.html",
-        modern: "modern.html"
+        app: "index.html"
       }
     }
   }

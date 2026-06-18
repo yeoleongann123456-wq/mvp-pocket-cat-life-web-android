@@ -5,3 +5,48 @@
 html {
   background: #120f19;
 }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 20% 5%, rgba(255, 171, 195, 0.22), transparent 28%),
+    radial-gradient(circle at 90% 10%, rgba(255, 212, 92, 0.16), transparent 26%),
+    linear-gradient(180deg, #0e111b 0%, #201221 52%, #120f19 100%);
+  font-family: Inter, ui-rounded, "SF Pro Rounded", "Segoe UI", Arial, sans-serif;
+}
+
+.room-scene {
+  min-height: 360px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 239, 205, 0.72), transparent 28%),
+    linear-gradient(180deg, #f8cfae 0 54%, #d99061 54% 56%, #b86f42 56% 100%);
+}
+
+.room-scene::before {
+  content: "";
+  position: absolute;
+  left: -12%;
+  right: -12%;
+  bottom: -12px;
+  height: 36%;
+  background:
+    repeating-linear-gradient(90deg, rgba(111, 63, 38, 0.22) 0 2px, transparent 2px 48px),
+    linear-gradient(180deg, rgba(255, 224, 180, 0.22), rgba(87, 48, 34, 0.12));
+  transform: perspective(500px) rotateX(58deg);
+  transform-origin: bottom center;
+}
+
+.cat-tail {
+  transform-origin: left bottom;
+  animation: mochi-tail 2.8s ease-in-out infinite;
+}
+
+@keyframes mochi-tail {
+  0%, 100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(9deg);
+  }
+}

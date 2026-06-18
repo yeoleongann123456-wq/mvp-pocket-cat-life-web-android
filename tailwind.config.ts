@@ -6,6 +6,7 @@ export default {
     extend: {
       colors: {
         mochi: {
+          bg: "#120f19",
           cream: "#fff1cf",
           rose: "#ffabc3",
           peach: "#ffd4bf",
