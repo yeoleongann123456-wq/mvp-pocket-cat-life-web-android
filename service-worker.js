@@ -1,10 +1,11 @@
-const CACHE_NAME = "pocket-cat-life-v6-retention";
+const CACHE_NAME = "pocket-cat-life-v6-modern-stack";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
   "./manifest.json",
+  "./firebase-messaging-sw.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];

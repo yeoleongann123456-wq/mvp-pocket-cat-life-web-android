@@ -1,0 +1,39 @@
+{
+  "name": "mochi-the-cat-that-cares",
+  "version": "6.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.7.0",
+  "description": "Pocket Cat Life / Mochi modern frontend preparation with React, TypeScript, Vite, Tailwind, Capacitor, Firebase, and service scaffolding.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "cap:sync": "pnpm build && cap sync",
+    "cap:open:android": "cap open android",
+    "cap:open:ios": "cap open ios",
+    "legacy:serve": "python3 -m http.server 8080"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.4.0",
+    "firebase": "^12.15.0",
+    "framer-motion": "^12.40.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-icons": "^5.6.0",
+    "react-router-dom": "^7.18.0",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
+  }
+}

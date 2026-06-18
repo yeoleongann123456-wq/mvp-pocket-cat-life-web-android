@@ -6,6 +6,102 @@ Version 6 adds game-feel and retention systems: first-run tutorial, cat naming, 
 
 Version 5 visual polish now rebuilds the main experience as a mobile game UI: a warm 3D-style room scene, a larger glossy toy-like cat, dark glass stat HUD, circular 3D action buttons, a game-style bottom tab bar, pastel task/shop/diary/bag screens, and shop categories for Food, Toys, Decor, and Collar items.
 
+## Modern Architecture Preparation
+
+The existing playable PWA remains available at `index.html`. A modern React/Vite architecture has been added beside it for safe incremental migration.
+
+Installed stack:
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Capacitor
+- Firebase SDK
+- Zustand
+- React Router
+- React Icons
+- Framer Motion
+
+New entry points:
+
+- `index.html`: current production game, unchanged as the main playable entry.
+- `modern.html`: future React app shell for incremental migration.
+
+Core structure:
+
+```text
+src/
+  assets/
+  components/
+  features/
+    cat/
+    health/
+    relationship/
+    reminders/
+    tasks/
+  hooks/
+  pages/
+  services/
+    firebase/
+    health/
+    notifications/
+    openai/
+  store/
+  styles/
+  types/
+  utils/
+```
+
+Architecture config:
+
+- `package.json`
+- `pnpm-lock.yaml`
+- `vite.config.ts`
+- `tsconfig.json`
+- `tailwind.config.ts`
+- `postcss.config.js`
+- `capacitor.config.ts`
+- `firebase-messaging-sw.js`
+
+Development commands:
+
+```bash
+pnpm install
+pnpm dev
+pnpm build
+pnpm preview
+pnpm typecheck
+```
+
+In non-interactive CI/Codex-style environments, use:
+
+```bash
+CI=true pnpm install
+./node_modules/.bin/tsc --noEmit
+./node_modules/.bin/vite build
+```
+
+Capacitor preparation:
+
+```bash
+pnpm cap:sync
+pnpm cap:open:android
+pnpm cap:open:ios
+```
+
+Firebase and notifications:
+
+- Firebase config reads from `VITE_FIREBASE_*` environment variables.
+- FCM service setup lives in `src/services/firebase/` and `src/services/notifications/`.
+- `firebase-messaging-sw.js` is a placeholder for future push notification work.
+
+AI and health preparation:
+
+- OpenAI calls should go through a backend proxy, prepared in `src/services/openai/`.
+- Apple HealthKit placeholder: `src/services/health/appleHealthKit.ts`
+- Android Health Connect placeholder: `src/services/health/androidHealthConnect.ts`
+
 ## How to Run
 
 You can still open `index.html` directly in a browser to play the game.
