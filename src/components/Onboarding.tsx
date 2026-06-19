@@ -8,8 +8,9 @@ type OnboardingProps = {
 };
 
 export default function Onboarding({ onComplete }: OnboardingProps) {
-  const [catName, setCatName] = useState("Mochi");
+  const [catName, setCatName] = useState("");
   const [breedId, setBreedId] = useState<BreedId>("orange");
+  const displayName = catName.trim();
 
   return (
     <main className="min-h-screen bg-mochi-bg px-4 py-6 text-[#49343a]">
@@ -32,6 +33,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
             className="h-12 rounded-2xl border border-[#f1c9d5] bg-white px-4 text-base outline-none focus:ring-4 focus:ring-[#ffabc3]/30"
             maxLength={18}
             onChange={(event) => setCatName(event.target.value)}
+            placeholder="Mochi"
             value={catName}
           />
         </label>
@@ -68,7 +70,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           onClick={() => onComplete(catName, breedId)}
           type="button"
         >
-          Meet Mochi
+          {displayName ? `Meet ${displayName}` : "Meet your cat"}
         </button>
       </motion.section>
     </main>
