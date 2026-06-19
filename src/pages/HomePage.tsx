@@ -6,6 +6,7 @@ import CatRoom from "../components/CatRoom";
 import type { CatExpression } from "../components/CatRoom";
 import { CAT_BREEDS } from "../features/cat/breeds";
 import { getRelationshipLevel, getRelationshipProgress } from "../features/relationship/levels";
+import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
 import { formatReminderDate, getTimeGreeting } from "../utils/date";
 
@@ -39,6 +40,7 @@ export default function HomePage() {
 
   function triggerAction(nextAction: string, text: string, effect: () => void) {
     effect();
+    playMochiSound(soundForAction(nextAction));
     setAction(nextAction);
     setFloatingText(text);
     window.setTimeout(() => {
@@ -51,14 +53,18 @@ export default function HomePage() {
     if (interaction === "doubleTap") {
       addRelationship(2);
       addStars(2);
+      playMochiSound("happy");
       setFloatingText("+Bond +Stars");
     } else if (interaction === "longPress") {
       addRelationship(2);
+      playMochiSound("purr");
       setFloatingText("+Purr +Bond");
     } else if (interaction === "drag") {
+      playMochiSound("happy");
       setFloatingText("+Play");
     } else {
       addRelationship(1);
+      playMochiSound("meow");
       setFloatingText("+Love");
     }
     window.setTimeout(() => setFloatingText(""), 900);
@@ -138,6 +144,16 @@ function actionToExpression(action: string, waterGlasses: number, mood: string):
   if (mood === "tired") return "sleepy";
   if (waterGlasses < 2) return "hungry";
   return "happy";
+}
+
+function soundForAction(action: string) {
+  if (action === "feed") return "eat";
+  if (action === "pet") return "purr";
+  if (action === "play") return "happy";
+  if (action === "sleep") return "sleepy";
+  if (action === "clean") return "reward";
+  if (action === "work") return "taskComplete";
+  return "button";
 }
 
 function SummaryCard({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {

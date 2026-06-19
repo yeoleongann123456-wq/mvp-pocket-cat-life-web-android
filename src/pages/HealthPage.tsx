@@ -1,4 +1,5 @@
 import type { MoodValue } from "../types/game";
+import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
 
 const moods: Array<{ value: MoodValue; label: string }> = [
@@ -16,6 +17,11 @@ export default function HealthPage() {
   const setSteps = useMochiStore((state) => state.setSteps);
   const setMood = useMochiStore((state) => state.setMood);
 
+  function drinkWater() {
+    addWater();
+    playMochiSound("reward");
+  }
+
   return (
     <section className="grid gap-4">
       <header className="rounded-[28px] bg-gradient-to-br from-[#fff1cf] to-[#ffdce8] p-5 shadow-xl">
@@ -29,7 +35,7 @@ export default function HealthPage() {
             <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">Water</p>
             <h3 className="text-2xl font-black">{log.waterGlasses} / 8 glasses</h3>
           </div>
-          <button className="rounded-2xl bg-[#8ecae6] px-4 py-3 font-black text-white shadow-lg" onClick={addWater}>
+          <button className="rounded-2xl bg-[#8ecae6] px-4 py-3 font-black text-white shadow-lg" onClick={drinkWater}>
             + Water
           </button>
         </div>
@@ -50,6 +56,7 @@ export default function HealthPage() {
             className="h-12 rounded-2xl border border-[#f1c9d5] px-4 text-base outline-none"
             inputMode="decimal"
             onChange={(event) => setSleep(Number(event.target.value))}
+            onBlur={() => playMochiSound("sleepy")}
             placeholder="7.5"
             type="number"
             value={log.sleepHours || ""}
@@ -61,6 +68,7 @@ export default function HealthPage() {
             className="h-12 rounded-2xl border border-[#f1c9d5] px-4 text-base outline-none"
             inputMode="numeric"
             onChange={(event) => setSteps(Number(event.target.value))}
+            onBlur={() => playMochiSound("reward")}
             placeholder="4200"
             type="number"
             value={log.steps || ""}
@@ -77,7 +85,10 @@ export default function HealthPage() {
                 log.mood === mood.value ? "bg-[#ff8dad] text-white" : "bg-[#fff1f5] text-[#49343a]"
               }`}
               key={mood.value}
-              onClick={() => setMood(mood.value)}
+              onClick={() => {
+                setMood(mood.value);
+                playMochiSound(mood.value === "great" ? "happy" : "meow");
+              }}
               type="button"
             >
               {mood.label}

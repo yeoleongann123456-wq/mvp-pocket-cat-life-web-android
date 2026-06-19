@@ -4,6 +4,7 @@ import { BREED_OPTIONS, CAT_BREEDS } from "../features/cat/breeds";
 import { SHOP_ITEMS } from "../features/cat/shopItems";
 import { CAT_UNLOCKS } from "../features/cat/unlocks";
 import { getRelationshipLevel } from "../features/relationship/levels";
+import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
 import type { BreedId, ShopCategory } from "../types/game";
 
@@ -26,6 +27,11 @@ export default function CatPage() {
   const tasksCompleted = tasks.filter((task) => task.completed).length;
   const unlockContext = { healthLogs, tasksCompleted, relationshipPoints: points, reminders };
   const visibleItems = SHOP_ITEMS.filter((item) => category === "All" || item.category === category);
+
+  function purchaseItem(itemId: string, price: number) {
+    const purchased = buyItem(itemId, price);
+    playMochiSound(purchased ? "purchase" : "button");
+  }
 
   return (
     <section className="grid gap-4">
@@ -107,7 +113,7 @@ export default function CatPage() {
                 <button
                   className={`h-11 rounded-2xl text-sm font-black shadow ${owned ? "bg-[#8bc7a5] text-white" : affordable ? "bg-[#49343a] text-white" : "bg-[#ddd2d5] text-[#7c6460]"}`}
                   disabled={owned || !affordable}
-                  onClick={() => buyItem(item.id, item.price)}
+                onClick={() => purchaseItem(item.id, item.price)}
                   type="button"
                 >
                   {owned ? "Owned" : affordable ? `Buy · ${item.price} stars` : `Need ${item.price - stars} stars`}

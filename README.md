@@ -34,6 +34,13 @@ The original Pocket Cat Life prototype is preserved as `legacy-pocket-cat.html`,
   - Breed-specific silhouettes, markings, tail types, and idle poses
   - Cat interactions: tap, double tap, long press, and drag with relationship feedback
   - Pet Society-style room depth with wall, floor, sunlight, rug, furniture, and item placement
+- Mochi Audio Upgrade V1
+  - Web Audio sound system with no autoplay before user interaction
+  - Cat sounds: meow, purr, sleepy cat, happy cat, eating
+  - UI sounds: button click, reward, task complete, level up-style chimes, purchase
+  - Ambient loops: day, night, rain
+  - Background music loops: cozy piano, soft lofi, relaxing
+  - Sound on/off toggle, music volume slider, SFX volume slider, music/ambience selectors
 - Cat collection
   - Locked and unlocked cat preview cards
   - Unlock goals for Ragdoll, British Shorthair, Black Cat, Munchkin, and Lucky Dragon Cat
@@ -142,6 +149,7 @@ Stored data:
 - relationship points
 - stars
 - owned shop items
+- audio settings: enabled, music volume, SFX volume, music track, ambience track
 - health logs
 - tasks
 - reminders
@@ -222,6 +230,19 @@ Notes:
 4. Long press the cat: Mochi purrs with closed, happy energy.
 5. Lightly drag the cat: Mochi follows slightly and returns smoothly.
 6. Use action buttons: `Pet`, `Water`, `Play`, `Sleep`, `Clean`, and `Focus` change the cat's expression and animation.
+
+## How to Test Audio
+
+1. Open the app in Safari or Chrome.
+2. Tap any button once. Audio starts only after this user gesture.
+3. Open the `Sound` panel near the top of the app.
+4. Toggle sound on/off.
+5. Adjust `Music Volume` and `SFX Volume`.
+6. Try music tracks: `Cozy Piano`, `Soft Lofi`, `Relaxing`.
+7. Try ambience: `Day`, `Night`, `Rain`, `Off`.
+8. Tap Mochi, pet Mochi, use Water/Play/Sleep, buy a shop item, and complete a task to hear different SFX.
+
+Audio is synthesized with the browser Web Audio API, so no large audio files are required and the PWA remains offline-friendly.
 
 Unlock examples:
 

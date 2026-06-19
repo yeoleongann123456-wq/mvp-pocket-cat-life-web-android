@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { BreedId, CareTask, HealthLog, MochiState, MoodValue, Reminder, RepeatOption } from "../types/game";
+import type { AudioSettings, BreedId, CareTask, HealthLog, MochiState, MoodValue, Reminder, RepeatOption } from "../types/game";
 import { todayKey } from "../utils/date";
 
 const DEFAULT_HEALTH_LOG = (date: string): HealthLog => ({
@@ -24,7 +24,14 @@ const initialState: MochiState = {
   tasks: [],
   reminders: [],
   stars: 120,
-  ownedItems: ["starter-rug"]
+  ownedItems: ["starter-rug"],
+  audioSettings: {
+    enabled: true,
+    musicVolume: 0.28,
+    sfxVolume: 0.7,
+    musicTrack: "cozyPiano",
+    ambientTrack: "day"
+  }
 };
 
 type MochiActions = {
@@ -44,6 +51,7 @@ type MochiActions = {
   addReminder: (input: { title: string; date: string; time: string; repeat: RepeatOption }) => void;
   toggleReminder: (reminderId: string) => void;
   buyItem: (itemId: string, price: number) => boolean;
+  updateAudioSettings: (settings: Partial<AudioSettings>) => void;
   setNotificationPreference: (value: MochiState["profile"]["notificationPreference"]) => void;
   resetMochi: () => void;
 };
@@ -232,6 +240,15 @@ export const useMochiStore = create<MochiStore>()(
         });
         return true;
       },
+      updateAudioSettings: (settings) => {
+        set((state) => ({
+          audioSettings: {
+            ...initialState.audioSettings,
+            ...(state.audioSettings ?? initialState.audioSettings),
+            ...settings
+          }
+        }));
+      },
       setNotificationPreference: (value) => {
         set((state) => ({
           profile: {
@@ -245,7 +262,7 @@ export const useMochiStore = create<MochiStore>()(
     {
       name: "mochiCareSave",
       storage: createJSONStorage(() => localStorage),
-      version: 2,
+      version: 3,
       migrate: (persistedState) => {
         const saved = persistedState as Partial<MochiState>;
         return {
@@ -259,7 +276,11 @@ export const useMochiStore = create<MochiStore>()(
           tasks: saved.tasks ?? [],
           reminders: saved.reminders ?? [],
           stars: typeof saved.stars === "number" ? saved.stars : initialState.stars,
-          ownedItems: Array.isArray(saved.ownedItems) ? saved.ownedItems : initialState.ownedItems
+          ownedItems: Array.isArray(saved.ownedItems) ? saved.ownedItems : initialState.ownedItems,
+          audioSettings: {
+            ...initialState.audioSettings,
+            ...(saved.audioSettings ?? {})
+          }
         } as MochiStore;
       }
     }

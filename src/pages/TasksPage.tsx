@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FiCheck } from "react-icons/fi";
+import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
 
 export default function TasksPage() {
@@ -10,7 +11,13 @@ export default function TasksPage() {
 
   function submitTask() {
     addTask(title);
+    if (title.trim()) playMochiSound("button");
     setTitle("");
+  }
+
+  function completeTask(taskId: string, completed: boolean) {
+    toggleTask(taskId);
+    if (!completed) playMochiSound("taskComplete");
   }
 
   return (
@@ -43,7 +50,7 @@ export default function TasksPage() {
             <button
               className="grid grid-cols-[44px_1fr] items-center gap-3 rounded-[24px] border border-white/30 bg-white/80 p-3 text-left shadow-lg"
               key={task.id}
-              onClick={() => toggleTask(task.id)}
+              onClick={() => completeTask(task.id, task.completed)}
               type="button"
             >
               <span className={`grid h-11 w-11 place-items-center rounded-2xl ${task.completed ? "bg-[#8bc7a5] text-white" : "bg-[#fff1cf] text-[#b26d83]"}`}>

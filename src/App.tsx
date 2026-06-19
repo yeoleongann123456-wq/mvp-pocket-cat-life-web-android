@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
+import AudioControls from "./components/AudioControls";
 import BottomNav from "./components/BottomNav";
 import Onboarding from "./components/Onboarding";
 import { CAT_BREEDS } from "./features/cat/breeds";
+import { useButtonClickAudio, useMochiAudio } from "./hooks/useMochiAudio";
 import { useReminderNotifications } from "./hooks/useReminderNotifications";
 import CatPage from "./pages/CatPage";
 import HealthPage from "./pages/HealthPage";
@@ -19,6 +21,8 @@ export default function App() {
   const notificationsEnabled = profile.notificationPreference === "allowed";
   const breed = CAT_BREEDS[profile.breedId];
 
+  useMochiAudio();
+  useButtonClickAudio();
   useReminderNotifications(reminders, notificationsEnabled);
 
   useEffect(() => {
@@ -44,6 +48,7 @@ export default function App() {
             style={{ background: `linear-gradient(135deg, ${breed.colors.secondary}, ${breed.colors.primary})` }}
           />
         </header>
+        <AudioControls />
 
         <Routes>
           <Route element={<HomePage />} path="/" />

@@ -65,6 +65,18 @@ export type ShopItem = {
   afterPreview: string;
 };
 
+export type MusicTrack = "cozyPiano" | "softLofi" | "relaxing";
+
+export type AmbientTrack = "day" | "night" | "rain" | "off";
+
+export type AudioSettings = {
+  enabled: boolean;
+  musicVolume: number;
+  sfxVolume: number;
+  musicTrack: MusicTrack;
+  ambientTrack: AmbientTrack;
+};
+
 export type MochiState = {
   profile: UserProfile;
   relationshipPoints: number;
@@ -73,4 +85,5 @@ export type MochiState = {
   reminders: Reminder[];
   stars: number;
   ownedItems: string[];
+  audioSettings: AudioSettings;
 };
