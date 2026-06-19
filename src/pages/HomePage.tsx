@@ -3,6 +3,7 @@ import { FiBell, FiBriefcase, FiCoffee, FiHeart, FiMoon, FiSmile, FiSun, FiTrend
 import type { ReactNode } from "react";
 import { TbDropletHeart } from "react-icons/tb";
 import CatRoom from "../components/CatRoom";
+import type { CatExpression } from "../components/CatRoom";
 import { CAT_BREEDS } from "../features/cat/breeds";
 import { getRelationshipLevel, getRelationshipProgress } from "../features/relationship/levels";
 import { useMochiStore } from "../store/useMochiStore";
@@ -46,10 +47,27 @@ export default function HomePage() {
     }, 900);
   }
 
+  function handleCatInteract(interaction: "tap" | "doubleTap" | "longPress" | "drag") {
+    if (interaction === "doubleTap") {
+      addRelationship(2);
+      addStars(2);
+      setFloatingText("+Bond +Stars");
+    } else if (interaction === "longPress") {
+      addRelationship(2);
+      setFloatingText("+Purr +Bond");
+    } else if (interaction === "drag") {
+      setFloatingText("+Play");
+    } else {
+      addRelationship(1);
+      setFloatingText("+Love");
+    }
+    window.setTimeout(() => setFloatingText(""), 900);
+  }
+
   return (
     <section className="grid gap-4">
       <div className="sticky top-2 z-20 grid gap-2">
-        <CatRoom action={action} breed={breed} catName={profile.catName} compact expression={actionToExpression(action, log.waterGlasses)} ownedItems={ownedItems} />
+        <CatRoom action={action} breed={breed} catName={profile.catName} compact expression={actionToExpression(action, log.waterGlasses, log.mood)} onCatInteract={handleCatInteract} ownedItems={ownedItems} />
         {floatingText && <div className="pointer-events-none -mt-16 justify-self-center rounded-full bg-white/95 px-4 py-2 text-sm font-black text-[#49343a] shadow-xl">{floatingText}</div>}
         <section className="action-scroll -mx-1 flex gap-2 overflow-x-auto rounded-[24px] bg-[#2a1c2d]/90 p-2 shadow-xl backdrop-blur">
           <ActionButton icon={<FiCoffee />} label="Water" onClick={() => triggerAction("feed", "+Water +Bond +Stars", addWater)} />
@@ -111,11 +129,13 @@ function ActionButton({ icon, label, onClick }: { icon: ReactNode; label: string
   );
 }
 
-function actionToExpression(action: string, waterGlasses: number) {
+function actionToExpression(action: string, waterGlasses: number, mood: string): CatExpression {
   if (action === "sleep") return "sleepy";
   if (action === "work") return "proud";
   if (action === "play" || action === "pet") return "excited";
   if (action === "feed") return "happy";
+  if (mood === "sad" || mood === "stressed") return "sad";
+  if (mood === "tired") return "sleepy";
   if (waterGlasses < 2) return "hungry";
   return "happy";
 }

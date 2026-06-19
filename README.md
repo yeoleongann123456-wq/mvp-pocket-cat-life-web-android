@@ -29,6 +29,11 @@ The original Pocket Cat Life prototype is preserved as `legacy-pocket-cat.html`,
 - Game feel actions
   - Compact icon actions near the cat: Water, Pet, Play, Sleep, Clean, Focus
   - Floating reward text and animated cat reactions
+- Mochi Visual Rework V3
+  - Plush mascot proportions: oversized head, tiny body, glossy eyes, soft cheeks, paws, fluffy tail
+  - Breed-specific silhouettes, markings, tail types, and idle poses
+  - Cat interactions: tap, double tap, long press, and drag with relationship feedback
+  - Pet Society-style room depth with wall, floor, sunlight, rug, furniture, and item placement
 - Cat collection
   - Locked and unlocked cat preview cards
   - Unlock goals for Ragdoll, British Shorthair, Black Cat, Munchkin, and Lucky Dragon Cat
@@ -208,6 +213,15 @@ Notes:
 4. Tap `Use Cat` on any unlocked cat.
 5. Return to `Home`; the sticky room should immediately show the selected cat.
 6. Locked cats stay visible as faded preview cards with their unlock condition.
+
+## How to Test Cat Interactions
+
+1. Open `Home`.
+2. Tap the cat once: Mochi smiles and gives love feedback.
+3. Double tap the cat: Mochi jumps and relationship/stars increase.
+4. Long press the cat: Mochi purrs with closed, happy energy.
+5. Lightly drag the cat: Mochi follows slightly and returns smoothly.
+6. Use action buttons: `Pet`, `Water`, `Play`, `Sleep`, `Clean`, and `Focus` change the cat's expression and animation.
 
 Unlock examples:
 
