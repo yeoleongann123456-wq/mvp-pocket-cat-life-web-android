@@ -11,3 +11,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     </HashRouter>
   </React.StrictMode>
 );
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}service-worker.js`).catch(() => {
+      // PWA remains playable if registration is blocked by the browser.
+    });
+  });
+}

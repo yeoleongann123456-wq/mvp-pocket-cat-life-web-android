@@ -1,7 +1,8 @@
-const CACHE_NAME = "mochi-cares-mvp-v1";
+const CACHE_NAME = "mochi-cares-audio-v2";
 const ASSETS = [
   "./",
   "./index.html",
+  "./app.html",
   "./manifest.json",
   "./firebase-messaging-sw.js",
   "./icons/icon-192.png",
@@ -31,6 +32,21 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          const responseCopy = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put("./index.html", responseCopy);
+          });
+          return networkResponse;
+        })
+        .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) return cachedResponse;
@@ -44,9 +60,6 @@ self.addEventListener("fetch", (event) => {
           return networkResponse;
         })
         .catch(() => {
-          if (event.request.mode === "navigate") {
-            return caches.match("./index.html");
-          }
           return Response.error();
         });
     })
