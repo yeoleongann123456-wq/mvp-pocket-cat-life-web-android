@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import type { CSSProperties } from "react";
 import type { CatBreed } from "../types/game";
+import type { WorldPhase } from "../features/retention/retention";
 
 export type CatExpression = "happy" | "sleepy" | "worried" | "proud" | "hungry" | "excited" | "sad";
 type CatInteraction = "tap" | "doubleTap" | "longPress" | "drag";
@@ -13,6 +14,7 @@ type CatRoomProps = {
   ownedItems?: string[];
   expression?: CatExpression;
   action?: string;
+  worldPhase?: WorldPhase;
   compact?: boolean;
   onCatInteract?: (interaction: CatInteraction) => void;
 };
@@ -42,6 +44,7 @@ export default function CatRoom({
   ownedItems = [],
   expression = "happy",
   action = "idle",
+  worldPhase = "morning",
   compact = false,
   onCatInteract
 }: CatRoomProps) {
@@ -84,8 +87,8 @@ export default function CatRoom({
   }
 
   return (
-    <section className={`room-scene relative overflow-hidden rounded-[28px] border border-white/30 shadow-2xl ${compact ? "room-compact" : ""}`}>
-      <RoomLayers has={has} compact={compact} />
+    <section className={`room-scene world-${worldPhase} relative overflow-hidden rounded-[28px] border border-white/30 shadow-2xl ${compact ? "room-compact" : ""}`}>
+      <RoomLayers has={has} compact={compact} worldPhase={worldPhase} />
       <motion.div
         animate={animationFor(activeAction)}
         className={`cat-mascot ${visual.className} pose-${visual.pose} expression-${activeExpression} action-${activeAction} tail-${visual.tail} markings-${visual.markings} absolute left-1/2 select-none`}
@@ -132,9 +135,9 @@ export default function CatRoom({
           </>
         )}
         {activeAction === "feed" && <span className="action-prop food-bowl"><span /></span>}
-        {activeAction === "play" && <span className="action-prop yarn-ball" />}
+        {(activeAction === "play" || activeAction === "toy") && <span className="action-prop yarn-ball" />}
         {(activeAction === "pet" || activeAction === "tap-heart" || activeAction === "purr") && <Hearts />}
-        {activeAction === "sleep" && <Zzz />}
+        {(activeAction === "sleep" || activeAction === "nap") && <Zzz />}
       </motion.div>
       {activeAction !== "idle" && <div className="floating-reward absolute left-1/2 top-24 -translate-x-1/2 rounded-full bg-white/90 px-4 py-2 text-sm font-black text-[#49343a] shadow-xl">+care</div>}
       {catName && (
@@ -146,12 +149,13 @@ export default function CatRoom({
   );
 }
 
-function RoomLayers({ has, compact }: { has: (itemId: string) => boolean; compact: boolean }) {
+function RoomLayers({ has, compact, worldPhase }: { has: (itemId: string) => boolean; compact: boolean; worldPhase: WorldPhase }) {
   return (
     <>
       <span className="room-sunbeam" />
       <div className={`room-window absolute left-7 top-6 h-24 w-32 rounded-2xl border-[7px] border-[#fff0dd] shadow-xl ${has("moon-window") ? "night-window" : ""}`}>
-        {has("moon-window") && <span className="absolute right-5 top-4 h-7 w-7 rounded-full bg-[#fff1a8] shadow-[0_0_18px_rgba(255,241,168,.8)]" />}
+        {(has("moon-window") || worldPhase === "night") && <span className="absolute right-5 top-4 h-7 w-7 rounded-full bg-[#fff1a8] shadow-[0_0_18px_rgba(255,241,168,.8)]" />}
+        {worldPhase === "rain" && <span className="room-rain" />}
         <div className="absolute inset-y-0 left-1/2 w-1 bg-white/70" />
         <div className="absolute inset-x-0 top-1/2 h-1 bg-white/70" />
       </div>
@@ -214,6 +218,14 @@ function Zzz() {
 }
 
 function animationFor(action: string) {
+  if (action === "walk") return { x: [-18, 18, -8, 0], y: [0, -2, 0, -1, 0], rotate: [0, -2, 2, 0] };
+  if (action === "sit") return { y: [0, 5, 4], scale: [1, 0.985, 0.99] };
+  if (action === "nap") return { y: [0, 7], rotate: [-1, -7], scale: [1, 0.97] };
+  if (action === "stretch") return { scaleX: [1, 1.08, 1.02], scaleY: [1, 0.94, 1], y: [0, 5, 0] };
+  if (action === "window") return { x: [0, -14, -14, 0], rotate: [0, -4, -4, 0] };
+  if (action === "toy") return { x: [0, -14, 16, -8, 0], y: [0, -8, -4, -10, 0], rotate: [0, -8, 10, -5, 0] };
+  if (action === "groom") return { rotate: [0, -3, 3, -2, 0], y: [0, 2, 0] };
+  if (action === "look") return { y: [0, -4, 0], scale: [1, 1.015, 1] };
   if (action === "play" || action === "jump") return { y: [0, -24, 0], rotate: [0, -8, 8, 0], scale: [1, 1.04, 1] };
   if (action === "sleep") return { y: [0, 8], rotate: [-1, -9], scale: [1, 0.96] };
   if (action === "feed") return { y: [0, 7, 0, 5, 0], rotate: [0, 1, 0, -1, 0] };
@@ -226,6 +238,7 @@ function animationFor(action: string) {
 
 function transitionFor(action: string): Transition {
   if (action === "idle") return { duration: 3.2, repeat: Infinity, ease: "easeInOut" };
+  if (["walk", "sit", "nap", "stretch", "window", "toy", "groom", "look"].includes(action)) return { duration: 3.8, ease: "easeInOut" };
   if (action === "sleep") return { duration: 0.8, ease: "easeInOut" };
   return { duration: 0.72, ease: "easeOut" };
 }

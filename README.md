@@ -84,8 +84,16 @@ The original Pocket Cat Life prototype is preserved as `legacy-pocket-cat.html`,
   - Daily check-in reward and returning-player messages for 1, 3, 7, and 14 day absences
   - Streak badges for daily visits, water goals, and task completion
   - Achievement popups: First Pet, First Reminder, 7 Day Streak, 100 Water Logs, Best Friend, Soul Companion
-  - Collection Book with Cats, Furniture, Toys, Collars, Wallpapers, and Rare Items
+  - Collection Book with Cats, Furniture, Toys, Collars, and Rare Items
   - Lightweight cat memory for mood, completed tasks, completed reminders, and recent visits
+- MochiTheCat V1.0 Core Retention & Personality Sprint
+  - Autonomous cat life: walk, sit, nap, stretch, look out the window, play with a toy, groom, and look at the player while idle
+  - Breed-specific personality dialogue for Orange Cat, Ragdoll, British Shorthair, Black Cat, Munchkin, and Lucky Dragon Cat
+  - Relationship stages surface special story lines and reactions
+  - Memory dialogue uses last mood, last completed task, last reminder, last login message, and streak count
+  - Visit streak rewards include Day 3, 7, 14, 30, and 100
+  - Day/night room state changes by local time; rain mode appears when rain ambience is selected
+  - Health actions increase relationship: water, sleep, mood check-in, tasks, reminders, and step logging
 
 ## Stack
 
@@ -283,8 +291,19 @@ Achievements and streaks:
 
 1. Pet the cat once for `First Pet`.
 2. Complete a reminder for `First Reminder`.
-3. Visit on multiple days to build streak rewards.
+3. Visit on multiple days to build Day 3, 7, 14, 30, and 100 streak rewards.
 4. Use browser devtools to adjust `mochiCareSave` dates if you need to simulate future days quickly.
+
+Autonomous cat life:
+
+1. Open `Home` and stop interacting.
+2. After a few seconds, the cat chooses a small self-directed behavior.
+3. Leave the page open; every few minutes the cat can walk, sit, nap, stretch, look out the window, play, groom, or look at the player.
+
+Day/night world:
+
+1. The room uses local time for morning, afternoon, evening, and night.
+2. In the `Sound` panel, choose `Rain` ambience to preview the rainy world state.
 
 Unlock examples:
 

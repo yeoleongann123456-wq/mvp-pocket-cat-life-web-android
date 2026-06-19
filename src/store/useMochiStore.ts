@@ -109,6 +109,7 @@ function previousDay(date: string) {
 }
 
 function visitMilestoneReward(streak: number) {
+  if (streak === 100) return { stars: 500, coins: 500, xp: 120 };
   if (streak === 30) return { stars: 120, coins: 120, xp: 40 };
   if (streak === 14) return { stars: 60, coins: 60, xp: 24 };
   if (streak === 7) return { stars: 30, coins: 30, xp: 16 };
@@ -208,7 +209,8 @@ export const useMochiStore = create<MochiStore>()(
             activeEvent: event,
             memory: {
               ...state.retention.memory,
-              lastVisitMessage: message
+              lastVisitMessage: message,
+              lastLoginDate: today
             },
             streaks: {
               ...state.retention.streaks,
@@ -282,15 +284,18 @@ export const useMochiStore = create<MochiStore>()(
       setSteps: (steps) => {
         const today = todayKey();
         const current = get().healthLogs[today] ?? DEFAULT_HEALTH_LOG(today);
-        set({
+        const previousSteps = current.steps;
+        const nextSteps = Math.max(0, Math.min(99999, Number(steps) || 0));
+        set((state) => ({
           healthLogs: {
-            ...get().healthLogs,
+            ...state.healthLogs,
             [today]: {
               ...current,
-              steps: Math.max(0, Math.min(99999, Number(steps) || 0))
+              steps: nextSteps
             }
-          }
-        });
+          },
+          relationshipPoints: state.relationshipPoints + (nextSteps > previousSteps ? 1 : 0)
+        }));
       },
       setMood: (mood) => {
         const today = todayKey();

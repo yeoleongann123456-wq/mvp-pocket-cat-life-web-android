@@ -1,6 +1,6 @@
 import { BREED_OPTIONS } from "../cat/breeds";
 import { SHOP_ITEMS } from "../cat/shopItems";
-import type { AchievementId, DailyGoal, DailyGoalKind, RandomEvent, RelationshipLevel, RetentionReward } from "../../types/game";
+import type { AchievementId, BreedId, DailyGoal, DailyGoalKind, HealthLog, RandomEvent, RelationshipLevel, RetentionReward } from "../../types/game";
 
 type GoalTemplate = {
   kind: DailyGoalKind;
@@ -32,11 +32,19 @@ const RANDOM_EVENTS: Array<Omit<RandomEvent, "id" | "createdAt">> = [
   { kind: "good", title: "Tiny Gift", message: "Your cat brought a small gift and waited for you to notice.", reward: { stars: 8, xp: 4 } },
   { kind: "good", title: "Toy Discovery", message: "Your cat discovered a forgotten toy behind the bed.", reward: { coins: 8, stars: 6 } },
   { kind: "good", title: "Furniture Coupon", message: "Your cat found a furniture coupon. Suspiciously useful.", reward: { coins: 15 } },
+  { kind: "good", title: "Found Gift", message: "Your cat carried over a tiny wrapped gift and waited very politely.", reward: { coins: 10, stars: 8 } },
   { kind: "neutral", title: "Attention Please", message: "Your cat is sitting nearby, pretending not to want attention." },
   { kind: "neutral", title: "Play Mood", message: "Your cat tapped the floor twice. That means playtime, apparently." },
+  { kind: "neutral", title: "Wants Cuddle", message: "Your cat leaned against you. This is not a request. It is a soft announcement." },
   { kind: "funny", title: "Plant Incident", message: "A plant has been gently knocked over. Your cat denies everything.", reward: { xp: 2 } },
+  { kind: "funny", title: "Sock Thief", message: "Your cat stole one sock and placed it in the room like a treasure.", reward: { xp: 2, coins: 4 } },
   { kind: "funny", title: "Tiny Mess", message: "Your cat made a tiny mess, then sat inside it like it was modern art.", reward: { xp: 2 } }
 ];
+
+export type AutonomousCatAction = "idle" | "walk" | "sit" | "nap" | "stretch" | "window" | "toy" | "groom" | "look";
+export type WorldPhase = "morning" | "afternoon" | "evening" | "night" | "rain";
+
+const AUTONOMOUS_ACTIONS: AutonomousCatAction[] = ["walk", "sit", "nap", "stretch", "window", "toy", "groom", "look"];
 
 export function generateDailyGoals(date: string): DailyGoal[] {
   const seed = hashString(date);
@@ -91,11 +99,81 @@ export function relationshipStory(level: RelationshipLevel) {
   return "I am still learning your rhythm, but I am here.";
 }
 
-export function memoryLine(memory: { lastMood?: string; lastCompletedTask?: string; lastReminderCompleted?: string }) {
+export function relationshipReaction(level: RelationshipLevel) {
+  if (level === "Friend") return "Your cat waits closer to the front of the room now.";
+  if (level === "Best Friend") return "Your cat runs over when you open the app.";
+  if (level === "Family") return "Your cat acts like this room belongs to both of you.";
+  if (level === "Soul Companion") return "Your cat seems to know when you need a gentle nudge.";
+  return "Your cat is curious about your habits.";
+}
+
+export function memoryLine(memory: { lastMood?: string; lastCompletedTask?: string; lastReminderCompleted?: string; lastVisitMessage?: string }, streakCount = 0) {
+  if (memory.lastMood === "tired") return "You looked tired yesterday. I saved the quiet corner for you.";
+  if (memory.lastMood === "sad" || memory.lastMood === "stressed") return "Last time felt heavy. I am here softly today.";
   if (memory.lastCompletedTask) return `You finished "${memory.lastCompletedTask}" recently. I noticed.`;
   if (memory.lastReminderCompleted) return `You completed "${memory.lastReminderCompleted}". Small care still counts.`;
   if (memory.lastMood) return `Last time, your mood was ${memory.lastMood}. I am checking in gently.`;
+  if (streakCount >= 3) return `You came back ${streakCount} days in a row. I remember that.`;
+  if (memory.lastVisitMessage) return memory.lastVisitMessage;
   return "Did you drink enough water today?";
+}
+
+export function breedCareDialogue(breedId: BreedId, catName: string, log: HealthLog, streakCount: number) {
+  const needsWater = log.waterGlasses < 4;
+  const hasMood = Boolean(log.mood);
+  const byBreed: Record<BreedId, string[]> = {
+    orange: [
+      needsWater ? `${catName} is dramatically hungry for snacks, but first: water.` : `${catName} says your hydration arc is looking heroic.`,
+      "Tiny sprint, tiny stretch, tiny victory. We can do one good thing."
+    ],
+    ragdoll: [
+      needsWater ? `${catName} nudges your cup closer, very gently.` : `${catName} feels calm knowing you cared for yourself.`,
+      hasMood ? "Thank you for telling me how your heart feels." : "When you are ready, I can sit with your mood."
+    ],
+    british: [
+      needsWater ? `${catName} recommends one orderly glass of water.` : `${catName} approves of today's routine.`,
+      streakCount >= 3 ? "Consistent effort. Quite respectable." : "A small routine, repeated, becomes comfort."
+    ],
+    black: [
+      needsWater ? `${catName} appears from the moonlit corner with a water reminder.` : `${catName} noticed your quiet discipline today.`,
+      "No drama. One small act of care. Then another."
+    ],
+    munchkin: [
+      needsWater ? `${catName} is zooming in circles until you drink water.` : `${catName} says: hydration completed, chaos reduced by 2%.`,
+      "Fast paws, soft heart. Let's do the next tiny thing."
+    ],
+    dragon: [
+      needsWater ? `${catName} blesses your water bottle with tiny dragon luck.` : `${catName} sparkles proudly over your care streak.`,
+      "Your day is guarded. Your next gentle action is blessed."
+    ]
+  };
+  const lines = byBreed[breedId];
+  return lines[Math.min(lines.length - 1, streakCount % lines.length)];
+}
+
+export function chooseAutonomousAction() {
+  return AUTONOMOUS_ACTIONS[Math.floor(Math.random() * AUTONOMOUS_ACTIONS.length)];
+}
+
+export function autonomousBehaviorLine(action: AutonomousCatAction, catName: string, breedId: BreedId) {
+  if (action === "walk") return `${catName} pads around the room to check on everything.`;
+  if (action === "sit") return `${catName} sits nearby, quietly keeping you company.`;
+  if (action === "nap") return `${catName} takes a tiny nap, saving energy for later.`;
+  if (action === "stretch") return `${catName} does a long stretch like a wellness professional.`;
+  if (action === "window") return `${catName} looks out the window and thinks mysterious cat thoughts.`;
+  if (action === "toy") return breedId === "munchkin" ? `${catName} attacks the toy with heroic nonsense.` : `${catName} bats a toy across the rug.`;
+  if (action === "groom") return `${catName} grooms carefully, then pretends nothing happened.`;
+  if (action === "look") return `${catName} looks at you like you matter.`;
+  return `${catName} is breathing softly beside you.`;
+}
+
+export function worldPhaseFor(date = new Date(), ambience?: string): WorldPhase {
+  if (ambience === "rain") return "rain";
+  const hour = date.getHours();
+  if (hour < 6 || hour >= 21) return "night";
+  if (hour < 12) return "morning";
+  if (hour < 17) return "afternoon";
+  return "evening";
 }
 
 export function collectionItems() {
@@ -113,7 +191,7 @@ export function collectionItems() {
   }));
   const rare = [
     { id: "rare-golden-yarn", category: "Rare Items", name: "Golden Yarn", requirement: "7 day streak" },
-    { id: "rare-legend-room", category: "Wallpapers", name: "Legend Room", requirement: "30 day streak" },
+    { id: "rare-legend-room", category: "Rare Items", name: "Legend Room", requirement: "30 day streak" },
     { id: "rare-dragon-toy", category: "Toys", name: "Dragon Toy", requirement: "Soul Companion" }
   ];
   return [...cats, ...shop, ...rare];

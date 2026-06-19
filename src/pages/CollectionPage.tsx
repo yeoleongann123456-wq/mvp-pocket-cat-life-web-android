@@ -6,7 +6,7 @@ import { collectionItems } from "../features/retention/retention";
 import { getRelationshipLevel } from "../features/relationship/levels";
 import { useMochiStore } from "../store/useMochiStore";
 
-const categories = ["Cats", "Furniture", "Toys", "Collars", "Wallpapers", "Rare Items"] as const;
+const categories = ["Cats", "Furniture", "Toys", "Collars", "Rare Items"] as const;
 type CollectionCategory = (typeof categories)[number];
 
 export default function CollectionPage() {
@@ -89,7 +89,7 @@ export default function CollectionPage() {
 
 function normalizeCategory(category: string): CollectionCategory {
   if (category === "Collar") return "Collars";
-  if (category === "Room" || category === "Window") return "Wallpapers";
+  if (category === "Room" || category === "Window") return "Furniture";
   if (category === "Cat Bed" || category === "Rug" || category === "Plants" || category === "Furniture") return "Furniture";
   if (category === "Toys") return "Toys";
   if (category === "Cats") return "Cats";
@@ -122,7 +122,6 @@ function iconFor(category: CollectionCategory, id: string) {
   if (category === "Furniture") return "🛋";
   if (category === "Toys") return "🧶";
   if (category === "Collars") return "🔔";
-  if (category === "Wallpapers") return "🪟";
   return <FiStar />;
 }
 

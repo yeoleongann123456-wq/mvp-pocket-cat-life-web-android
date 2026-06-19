@@ -127,6 +127,7 @@ export type CatMemory = {
   lastReminderCompleted?: string;
   lastVisitMessage?: string;
   lastPetAt?: string;
+  lastLoginDate?: string;
 };
 
 export type RetentionState = {

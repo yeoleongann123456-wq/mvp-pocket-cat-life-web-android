@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiBell, FiBriefcase, FiCoffee, FiHeart, FiMoon, FiSmile, FiSun, FiTrendingUp } from "react-icons/fi";
 import type { ReactNode } from "react";
 import { TbDropletHeart } from "react-icons/tb";
 import CatRoom from "../components/CatRoom";
 import type { CatExpression } from "../components/CatRoom";
 import { CAT_BREEDS } from "../features/cat/breeds";
-import { memoryLine, relationshipStory } from "../features/retention/retention";
+import { autonomousBehaviorLine, breedCareDialogue, chooseAutonomousAction, memoryLine, relationshipReaction, relationshipStory, worldPhaseFor } from "../features/retention/retention";
+import type { AutonomousCatAction } from "../features/retention/retention";
 import { getRelationshipLevel, getRelationshipProgress } from "../features/relationship/levels";
 import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
@@ -24,7 +25,10 @@ export default function HomePage() {
   const reminders = useMochiStore((state) => state.reminders);
   const ownedItems = useMochiStore((state) => state.ownedItems ?? []);
   const retention = useMochiStore((state) => state.retention);
+  const ambientTrack = useMochiStore((state) => state.audioSettings.ambientTrack);
   const [action, setAction] = useState("idle");
+  const [autonomousAction, setAutonomousAction] = useState<AutonomousCatAction>("idle");
+  const [autonomousLine, setAutonomousLine] = useState("");
   const [floatingText, setFloatingText] = useState("");
   const breed = CAT_BREEDS[profile.breedId];
   const catName = getCatDisplayName(profile.catName);
@@ -35,14 +39,37 @@ export default function HomePage() {
   const level = getRelationshipLevel(points);
   const progress = getRelationshipProgress(points);
   const dailyDone = retention.dailyGoals.filter((goal) => goal.claimed).length;
+  const worldPhase = worldPhaseFor(new Date(), ambientTrack);
+  const roomAction = action === "idle" ? autonomousAction : action;
 
   const dialogue = `${getTimeGreeting()}. ${breed.greeting} ${catName} says: ${
     log.waterGlasses < 4
-      ? "A few sips now would make future-you proud."
+      ? breedCareDialogue(profile.breedId, catName, log, retention.streaks.dailyVisits)
       : log.mood
-        ? "I saw you check in with yourself. That matters."
-        : "Tell me how your heart is doing when you are ready."
+        ? `${breedCareDialogue(profile.breedId, catName, log, retention.streaks.dailyVisits)} I saw your mood check-in. That matters.`
+        : `${breedCareDialogue(profile.breedId, catName, log, retention.streaks.dailyVisits)} Tell me how your heart is doing when you are ready.`
   }`;
+
+  useEffect(() => {
+    let clearActionTimer: number | undefined;
+    function runAutonomousLife() {
+      if (action !== "idle") return;
+      const next = chooseAutonomousAction();
+      setAutonomousAction(next);
+      setAutonomousLine(autonomousBehaviorLine(next, catName, profile.breedId));
+      clearActionTimer = window.setTimeout(() => {
+        setAutonomousAction("idle");
+        setAutonomousLine("");
+      }, 9000);
+    }
+    const firstTimer = window.setTimeout(runAutonomousLife, 4500);
+    const interval = window.setInterval(runAutonomousLife, 130000 + Math.floor(Math.random() * 50000));
+    return () => {
+      window.clearTimeout(firstTimer);
+      window.clearInterval(interval);
+      if (clearActionTimer) window.clearTimeout(clearActionTimer);
+    };
+  }, [action, catName, profile.breedId]);
 
   function triggerAction(nextAction: string, text: string, effect: () => void) {
     effect();
@@ -82,7 +109,7 @@ export default function HomePage() {
   return (
     <section className="grid gap-4">
       <div className="sticky top-2 z-20 grid gap-2">
-        <CatRoom action={action} breed={breed} catName={catName} compact expression={actionToExpression(action, log.waterGlasses, log.mood)} onCatInteract={handleCatInteract} ownedItems={ownedItems} />
+        <CatRoom action={roomAction} breed={breed} catName={catName} compact expression={actionToExpression(roomAction, log.waterGlasses, log.mood)} onCatInteract={handleCatInteract} ownedItems={ownedItems} worldPhase={worldPhase} />
         {floatingText && <div className="pointer-events-none -mt-16 justify-self-center rounded-full bg-white/95 px-4 py-2 text-sm font-black text-[#49343a] shadow-xl">{floatingText}</div>}
         <section className="action-scroll -mx-1 flex gap-2 overflow-x-auto rounded-[24px] bg-[#2a1c2d]/90 p-2 shadow-xl backdrop-blur">
           <ActionButton icon={<FiCoffee />} label="Water" onClick={() => triggerAction("feed", "+Water +Bond +Stars", addWater)} />
@@ -97,7 +124,7 @@ export default function HomePage() {
       <section className="rounded-[28px] border border-white/30 bg-white/80 p-4 shadow-xl backdrop-blur">
         <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">{getCatDisplayNameUpper(catName)} dialogue</p>
         <h2 className="mt-1 text-xl font-black leading-snug">{dialogue}</h2>
-        <p className="mt-3 rounded-2xl bg-[#fff1f5] px-3 py-2 text-sm font-bold leading-6 text-[#735c58]">{memoryLine(retention.memory)}</p>
+        <p className="mt-3 rounded-2xl bg-[#fff1f5] px-3 py-2 text-sm font-bold leading-6 text-[#735c58]">{autonomousLine || memoryLine(retention.memory, retention.streaks.dailyVisits)}</p>
       </section>
 
       <section className="rounded-[28px] bg-[#2a1c2d] p-4 text-white shadow-xl">
@@ -112,6 +139,7 @@ export default function HomePage() {
           <div className="h-full rounded-full bg-gradient-to-r from-[#ff8dad] to-[#ffd45c]" style={{ width: `${progress}%` }} />
         </div>
         <p className="mt-3 text-sm font-bold leading-6 text-white/75">{relationshipStory(level)}</p>
+        <p className="mt-2 text-xs font-black uppercase tracking-wide text-[#ffd45c]">{relationshipReaction(level)}</p>
       </section>
 
       <section className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[24px] border border-white/30 bg-white/75 p-4 shadow-lg">
@@ -159,7 +187,11 @@ function ActionButton({ icon, label, onClick }: { icon: ReactNode; label: string
 
 function actionToExpression(action: string, waterGlasses: number, mood: string): CatExpression {
   if (action === "sleep") return "sleepy";
+  if (action === "nap") return "sleepy";
   if (action === "work") return "proud";
+  if (action === "walk" || action === "look" || action === "window") return "happy";
+  if (action === "groom" || action === "sit") return "proud";
+  if (action === "stretch" || action === "toy") return "excited";
   if (action === "play" || action === "pet") return "excited";
   if (action === "feed") return "happy";
   if (mood === "sad" || mood === "stressed") return "sad";

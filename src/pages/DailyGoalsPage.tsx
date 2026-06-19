@@ -15,7 +15,7 @@ const goalIcons: Record<DailyGoalKind, typeof FiTarget> = {
   reminder: FiClock
 };
 
-const milestoneDays = [3, 7, 14, 30];
+const milestoneDays = [3, 7, 14, 30, 100];
 
 export default function DailyGoalsPage() {
   const profile = useMochiStore((state) => state.profile);
@@ -115,7 +115,7 @@ export default function DailyGoalsPage() {
             <h3 className="text-xl font-black">{retention.streaks.dailyVisits} day visit streak</h3>
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-4 gap-2">
+        <div className="mt-4 grid grid-cols-5 gap-2">
           {milestoneDays.map((day) => (
             <div className={`rounded-2xl p-2 text-center text-xs font-black ${retention.streaks.dailyVisits >= day ? "bg-[#ffd45c] text-[#49343a]" : "bg-white/10 text-white/65"}`} key={day}>
               Day {day}

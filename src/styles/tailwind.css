@@ -67,6 +67,31 @@ body {
   pointer-events: none;
 }
 
+.room-scene.world-morning {
+  background:
+    radial-gradient(circle at 48% 34%, rgba(255, 250, 228, 0.78), transparent 25%),
+    linear-gradient(180deg, #f8d6bd 0 52%, #d68b58 52% 54%, #b86f42 54% 100%);
+}
+
+.room-scene.world-afternoon {
+  background:
+    radial-gradient(circle at 52% 30%, rgba(255, 255, 246, 0.86), transparent 25%),
+    linear-gradient(180deg, #ffd8bd 0 52%, #dc935e 52% 54%, #bb7447 54% 100%);
+}
+
+.room-scene.world-evening {
+  background:
+    radial-gradient(circle at 44% 34%, rgba(255, 205, 139, 0.62), transparent 26%),
+    linear-gradient(180deg, #d99b8c 0 52%, #bd704e 52% 54%, #8f543c 54% 100%);
+}
+
+.room-scene.world-night,
+.room-scene.world-rain {
+  background:
+    radial-gradient(circle at 45% 30%, rgba(180, 201, 255, 0.34), transparent 27%),
+    linear-gradient(180deg, #77709d 0 52%, #5f4b70 52% 54%, #493652 54% 100%);
+}
+
 .room-window {
   background: linear-gradient(180deg, #9ed7ff, #b9e8c1);
   box-shadow: inset 0 -16px 18px rgba(53, 114, 146, 0.14), 0 14px 30px rgba(126, 72, 48, 0.18);
@@ -74,6 +99,37 @@ body {
 
 .room-window.night-window {
   background: linear-gradient(180deg, #3d3b73, #8b7bc8);
+}
+
+.world-night .room-window,
+.world-rain .room-window {
+  background: linear-gradient(180deg, #3d3b73, #8b7bc8);
+}
+
+.world-evening .room-window {
+  background: linear-gradient(180deg, #ffb06f, #ffd0a1);
+}
+
+.world-night .room-sunbeam {
+  opacity: 0.16;
+  background: linear-gradient(115deg, rgba(196, 215, 255, 0.42), rgba(196, 215, 255, 0));
+}
+
+.world-evening .room-sunbeam {
+  opacity: 0.62;
+  background: linear-gradient(115deg, rgba(255, 174, 104, 0.46), rgba(255, 174, 104, 0));
+}
+
+.world-rain .room-sunbeam {
+  opacity: 0.08;
+}
+
+.room-rain {
+  position: absolute;
+  inset: -8px;
+  background: repeating-linear-gradient(110deg, rgba(255, 255, 255, 0.58) 0 2px, transparent 2px 12px);
+  opacity: 0.45;
+  animation: rain-slide 0.8s linear infinite;
 }
 
 .room-sunbeam {
@@ -739,6 +795,42 @@ body {
   animation-duration: 4.8s;
 }
 
+.action-walk .cat-paw,
+.action-toy .cat-paw {
+  animation-duration: 0.42s;
+}
+
+.action-sit .cat-body {
+  transform: scale(var(--body-scale)) scaleY(0.93);
+}
+
+.action-nap .cat-eye,
+.action-groom .cat-eye {
+  height: 9px;
+  top: 81px;
+  border-radius: 999px;
+}
+
+.action-nap .cat-tail {
+  animation-duration: 5.2s;
+}
+
+.action-stretch .cat-body {
+  transform: scale(var(--body-scale)) scaleX(1.12) scaleY(0.9);
+}
+
+.action-window .cat-head {
+  transform: scale(var(--head-scale)) rotate(-8deg);
+}
+
+.action-look .cat-eye {
+  height: calc(54px * var(--eye-scale));
+}
+
+.action-groom .cat-paw-left {
+  animation: groom-paw 0.8s ease-in-out infinite;
+}
+
 .action-feed .cat-mouth {
   animation: chew 0.22s ease-in-out infinite;
 }
@@ -991,5 +1083,25 @@ body {
   100% {
     opacity: 0;
     transform: translate(-50%, -32px) scale(1);
+  }
+}
+
+@keyframes rain-slide {
+  from {
+    translate: 0 -12px;
+  }
+  to {
+    translate: -10px 12px;
+  }
+}
+
+@keyframes groom-paw {
+  0%, 100% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  50% {
+    translate: 16px -42px;
+    rotate: -18deg;
   }
 }
