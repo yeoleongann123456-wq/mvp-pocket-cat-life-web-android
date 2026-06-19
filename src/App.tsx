@@ -3,10 +3,13 @@ import { Route, Routes } from "react-router-dom";
 import AudioControls from "./components/AudioControls";
 import BottomNav from "./components/BottomNav";
 import Onboarding from "./components/Onboarding";
+import RetentionPopups from "./components/RetentionPopups";
 import { CAT_BREEDS } from "./features/cat/breeds";
 import { useButtonClickAudio, useMochiAudio } from "./hooks/useMochiAudio";
 import { useReminderNotifications } from "./hooks/useReminderNotifications";
 import CatPage from "./pages/CatPage";
+import CollectionPage from "./pages/CollectionPage";
+import DailyGoalsPage from "./pages/DailyGoalsPage";
 import HealthPage from "./pages/HealthPage";
 import HomePage from "./pages/HomePage";
 import RemindersPage from "./pages/RemindersPage";
@@ -55,11 +58,14 @@ export default function App() {
         <Routes>
           <Route element={<HomePage />} path="/" />
           <Route element={<HealthPage />} path="/health" />
+          <Route element={<DailyGoalsPage />} path="/goals" />
           <Route element={<TasksPage />} path="/tasks" />
           <Route element={<RemindersPage />} path="/reminders" />
+          <Route element={<CollectionPage />} path="/collection" />
           <Route element={<CatPage />} path="/cat" />
         </Routes>
       </section>
+      <RetentionPopups />
       <BottomNav />
     </main>
   );

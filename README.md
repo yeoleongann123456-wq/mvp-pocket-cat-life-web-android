@@ -77,6 +77,15 @@ The original Pocket Cat Life prototype is preserved as `legacy-pocket-cat.html`,
   - Family
   - Soul Companion
   - Relationship increases when the user drinks water, checks mood, completes tasks, logs sleep, and returns daily
+- MochiTheCat Retention Update V1
+  - Daily Goals page with 3 generated goals per day
+  - Claimable daily rewards: stars, coins, and relationship XP
+  - Random cat events after actions and on daily return
+  - Daily check-in reward and returning-player messages for 1, 3, 7, and 14 day absences
+  - Streak badges for daily visits, water goals, and task completion
+  - Achievement popups: First Pet, First Reminder, 7 Day Streak, 100 Water Logs, Best Friend, Soul Companion
+  - Collection Book with Cats, Furniture, Toys, Collars, Wallpapers, and Rare Items
+  - Lightweight cat memory for mood, completed tasks, completed reminders, and recent visits
 
 ## Stack
 
@@ -103,6 +112,7 @@ src/
     cat/
     health/
     relationship/
+    retention/
     reminders/
     tasks/
   hooks/
@@ -148,6 +158,11 @@ Stored data:
 - cat name
 - relationship points
 - stars
+- retention coins
+- daily goals and claimed state
+- random event and achievement popup state
+- visit, water, and task streaks
+- lightweight cat memory
 - owned shop items
 - audio settings: enabled, music volume, SFX volume, music track, ambience track
 - health logs
@@ -243,6 +258,33 @@ Notes:
 8. Tap Mochi, pet Mochi, use Water/Play/Sleep, buy a shop item, and complete a task to hear different SFX.
 
 Audio is synthesized with the browser Web Audio API, so no large audio files are required and the PWA remains offline-friendly.
+
+## How to Test Retention Systems
+
+Daily goals:
+
+1. Open the `Goals` tab.
+2. Complete matching actions such as Water, Pet, mood check-in, sleep log, task completion, or reminder completion.
+3. Return to `Goals` and claim rewards when progress reaches the target.
+
+Random events:
+
+1. Use Home actions such as Water or Pet.
+2. Events can appear after actions when enough time has passed.
+3. Daily check-in events appear on first login of the day.
+
+Collection:
+
+1. Open the `Book` tab.
+2. Switch categories to see collected and locked items.
+3. Locked items show `???` plus their unlock requirement.
+
+Achievements and streaks:
+
+1. Pet the cat once for `First Pet`.
+2. Complete a reminder for `First Reminder`.
+3. Visit on multiple days to build streak rewards.
+4. Use browser devtools to adjust `mochiCareSave` dates if you need to simulate future days quickly.
 
 Unlock examples:
 

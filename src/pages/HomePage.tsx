@@ -5,6 +5,7 @@ import { TbDropletHeart } from "react-icons/tb";
 import CatRoom from "../components/CatRoom";
 import type { CatExpression } from "../components/CatRoom";
 import { CAT_BREEDS } from "../features/cat/breeds";
+import { memoryLine, relationshipStory } from "../features/retention/retention";
 import { getRelationshipLevel, getRelationshipProgress } from "../features/relationship/levels";
 import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
@@ -19,8 +20,10 @@ export default function HomePage() {
   const setSleep = useMochiStore((state) => state.setSleep);
   const addRelationship = useMochiStore((state) => state.addRelationship);
   const addStars = useMochiStore((state) => state.addStars);
+  const recordRetentionAction = useMochiStore((state) => state.recordRetentionAction);
   const reminders = useMochiStore((state) => state.reminders);
   const ownedItems = useMochiStore((state) => state.ownedItems ?? []);
+  const retention = useMochiStore((state) => state.retention);
   const [action, setAction] = useState("idle");
   const [floatingText, setFloatingText] = useState("");
   const breed = CAT_BREEDS[profile.breedId];
@@ -31,6 +34,7 @@ export default function HomePage() {
     .sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`))[0];
   const level = getRelationshipLevel(points);
   const progress = getRelationshipProgress(points);
+  const dailyDone = retention.dailyGoals.filter((goal) => goal.claimed).length;
 
   const dialogue = `${getTimeGreeting()}. ${breed.greeting} ${catName} says: ${
     log.waterGlasses < 4
@@ -55,10 +59,12 @@ export default function HomePage() {
     if (interaction === "doubleTap") {
       addRelationship(2);
       addStars(2);
+      recordRetentionAction("pet");
       playMochiSound("happy");
       setFloatingText("+Bond +Stars");
     } else if (interaction === "longPress") {
       addRelationship(2);
+      recordRetentionAction("pet");
       playMochiSound("purr");
       setFloatingText("+Purr +Bond");
     } else if (interaction === "drag") {
@@ -66,6 +72,7 @@ export default function HomePage() {
       setFloatingText("+Play");
     } else {
       addRelationship(1);
+      recordRetentionAction("pet");
       playMochiSound("meow");
       setFloatingText("+Love");
     }
@@ -79,7 +86,7 @@ export default function HomePage() {
         {floatingText && <div className="pointer-events-none -mt-16 justify-self-center rounded-full bg-white/95 px-4 py-2 text-sm font-black text-[#49343a] shadow-xl">{floatingText}</div>}
         <section className="action-scroll -mx-1 flex gap-2 overflow-x-auto rounded-[24px] bg-[#2a1c2d]/90 p-2 shadow-xl backdrop-blur">
           <ActionButton icon={<FiCoffee />} label="Water" onClick={() => triggerAction("feed", "+Water +Bond +Stars", addWater)} />
-          <ActionButton icon={<FiHeart />} label="Pet" onClick={() => triggerAction("pet", "+Mood +Bond", () => addRelationship(2))} />
+          <ActionButton icon={<FiHeart />} label="Pet" onClick={() => triggerAction("pet", "+Mood +Bond", () => { addRelationship(2); recordRetentionAction("pet"); })} />
           <ActionButton icon={<FiSun />} label="Play" onClick={() => triggerAction("play", "+Mood +Stars", () => { addRelationship(2); addStars(4); })} />
           <ActionButton icon={<FiMoon />} label="Sleep" onClick={() => triggerAction("sleep", "+Rest +Bond", () => setSleep(8))} />
           <ActionButton icon={<FiSmile />} label="Clean" onClick={() => triggerAction("clean", "+Care +Stars", () => { addRelationship(1); addStars(3); })} />
@@ -90,6 +97,7 @@ export default function HomePage() {
       <section className="rounded-[28px] border border-white/30 bg-white/80 p-4 shadow-xl backdrop-blur">
         <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">{getCatDisplayNameUpper(catName)} dialogue</p>
         <h2 className="mt-1 text-xl font-black leading-snug">{dialogue}</h2>
+        <p className="mt-3 rounded-2xl bg-[#fff1f5] px-3 py-2 text-sm font-bold leading-6 text-[#735c58]">{memoryLine(retention.memory)}</p>
       </section>
 
       <section className="rounded-[28px] bg-[#2a1c2d] p-4 text-white shadow-xl">
@@ -103,6 +111,18 @@ export default function HomePage() {
         <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/10">
           <div className="h-full rounded-full bg-gradient-to-r from-[#ff8dad] to-[#ffd45c]" style={{ width: `${progress}%` }} />
         </div>
+        <p className="mt-3 text-sm font-bold leading-6 text-white/75">{relationshipStory(level)}</p>
+      </section>
+
+      <section className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[24px] border border-white/30 bg-white/75 p-4 shadow-lg">
+        <div>
+          <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">Today Goal</p>
+          <h3 className="font-black">{dailyDone === 3 ? "All tasks completed today!" : `${dailyDone}/3 daily rewards claimed`}</h3>
+          <p className="mt-1 text-sm font-bold text-[#7c6460]">Visit streak: {retention.streaks.dailyVisits} days · Coins: {retention.coins}</p>
+        </div>
+        <a className="rounded-2xl bg-[#49343a] px-4 py-3 text-sm font-black text-white shadow-lg" href="#/goals">
+          Goals
+        </a>
       </section>
 
       <section className="grid grid-cols-2 gap-3">

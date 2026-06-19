@@ -77,6 +77,78 @@ export type AudioSettings = {
   ambientTrack: AmbientTrack;
 };
 
+export type DailyGoalKind = "water" | "pet" | "task" | "mood" | "sleep" | "reminder";
+
+export type RetentionReward = {
+  stars: number;
+  coins: number;
+  xp: number;
+};
+
+export type DailyGoal = {
+  id: string;
+  kind: DailyGoalKind;
+  title: string;
+  target: number;
+  progress: number;
+  reward: RetentionReward;
+  claimed: boolean;
+};
+
+export type RandomEventKind = "good" | "neutral" | "funny" | "checkin";
+
+export type RandomEvent = {
+  id: string;
+  kind: RandomEventKind;
+  title: string;
+  message: string;
+  reward?: Partial<RetentionReward>;
+  createdAt: string;
+};
+
+export type AchievementId =
+  | "first_pet"
+  | "first_reminder"
+  | "seven_day_streak"
+  | "hundred_water_logs"
+  | "best_friend"
+  | "soul_companion";
+
+export type Achievement = {
+  id: AchievementId;
+  title: string;
+  description: string;
+  unlockedAt: string;
+};
+
+export type CatMemory = {
+  lastMood?: MoodValue;
+  lastCompletedTask?: string;
+  lastReminderCompleted?: string;
+  lastVisitMessage?: string;
+  lastPetAt?: string;
+};
+
+export type RetentionState = {
+  coins: number;
+  dailyGoalsDate: string;
+  dailyGoals: DailyGoal[];
+  lastDailyCheckIn: string;
+  lastRandomEventAt: string;
+  activeEvent?: RandomEvent;
+  activeAchievement?: Achievement;
+  achievements: Achievement[];
+  streaks: {
+    dailyVisits: number;
+    waterGoals: number;
+    taskCompletion: number;
+    lastVisitDate: string;
+    lastWaterGoalDate: string;
+    lastTaskGoalDate: string;
+  };
+  memory: CatMemory;
+};
+
 export type MochiState = {
   profile: UserProfile;
   relationshipPoints: number;
@@ -86,4 +158,5 @@ export type MochiState = {
   stars: number;
   ownedItems: string[];
   audioSettings: AudioSettings;
+  retention: RetentionState;
 };
