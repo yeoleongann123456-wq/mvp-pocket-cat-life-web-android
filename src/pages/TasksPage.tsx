@@ -2,10 +2,13 @@ import { useState } from "react";
 import { FiCheck } from "react-icons/fi";
 import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
+import { getCatDisplayName } from "../utils/catName";
 
 export default function TasksPage() {
   const [title, setTitle] = useState("");
   const tasks = useMochiStore((state) => state.tasks);
+  const profileCatName = useMochiStore((state) => state.profile.catName);
+  const catName = getCatDisplayName(profileCatName);
   const addTask = useMochiStore((state) => state.addTask);
   const toggleTask = useMochiStore((state) => state.toggleTask);
 
@@ -24,7 +27,7 @@ export default function TasksPage() {
     <section className="grid gap-4">
       <header className="rounded-[28px] bg-gradient-to-br from-[#d8cbff] to-[#ffe3ec] p-5 shadow-xl">
         <p className="text-xs font-black uppercase tracking-wide text-[#8b6bc0]">Tasks</p>
-        <h2 className="mt-1 text-3xl font-black">Mochi keeps it gentle.</h2>
+        <h2 className="mt-1 text-3xl font-black">{catName} keeps it gentle.</h2>
       </header>
 
       <section className="grid gap-3 rounded-[28px] border border-white/30 bg-white/80 p-4 shadow-xl">
@@ -44,7 +47,7 @@ export default function TasksPage() {
 
       <section className="grid gap-3">
         {tasks.length === 0 ? (
-          <EmptyState text="No tasks yet. Mochi suggests one small thing, not ten." />
+          <EmptyState text={`No tasks yet. ${catName} suggests one small thing, not ten.`} />
         ) : (
           tasks.map((task) => (
             <button

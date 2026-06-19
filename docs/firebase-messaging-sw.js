@@ -2,7 +2,7 @@
 // Add Firebase compat scripts and project config here when push notifications are enabled.
 self.addEventListener("push", (event) => {
   const fallback = {
-    title: "Mochi",
+    title: "Cat reminder",
     body: "Your cat is thinking about you."
   };
 

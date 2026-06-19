@@ -6,7 +6,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     name: "Cloud Puff Rug",
     category: "Rug",
     price: 0,
-    description: "A soft starter rug under Mochi.",
+    description: "A soft starter rug under the cat.",
     preview: "Plain floor",
     afterPreview: "Pastel cloud rug appears under the cat"
   },
@@ -17,14 +17,14 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 45,
     description: "Warms the room and makes the cat pop visually.",
     preview: "Simple cloud rug",
-    afterPreview: "Golden round rug under Mochi"
+    afterPreview: "Golden round rug under the cat"
   },
   {
     id: "cat-bed",
     name: "Cupcake Cat Bed",
     category: "Cat Bed",
     price: 60,
-    description: "Adds a cozy bed beside Mochi.",
+    description: "Adds a cozy bed beside the cat.",
     preview: "Empty left corner",
     afterPreview: "Pink bed appears near the cat"
   },
@@ -51,7 +51,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     name: "Rose Bell Collar",
     category: "Collar",
     price: 80,
-    description: "Mochi wears a tiny bell collar.",
+    description: "The cat wears a tiny bell collar.",
     preview: "No collar",
     afterPreview: "Cute collar appears on the cat"
   },
@@ -62,7 +62,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 50,
     description: "Adds a toy ball in the room.",
     preview: "Empty floor",
-    afterPreview: "Yarn toy sits beside Mochi"
+    afterPreview: "Yarn toy sits beside the cat"
   },
   {
     id: "wood-shelf",
@@ -71,6 +71,6 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 100,
     description: "Adds cozy dollhouse furniture to the wall.",
     preview: "Plain wall",
-    afterPreview: "Shelf appears behind Mochi"
+    afterPreview: "Shelf appears behind the cat"
   }
 ];

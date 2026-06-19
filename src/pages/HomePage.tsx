@@ -8,6 +8,7 @@ import { CAT_BREEDS } from "../features/cat/breeds";
 import { getRelationshipLevel, getRelationshipProgress } from "../features/relationship/levels";
 import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
+import { getCatDisplayName, getCatDisplayNameUpper } from "../utils/catName";
 import { formatReminderDate, getTimeGreeting } from "../utils/date";
 
 export default function HomePage() {
@@ -23,6 +24,7 @@ export default function HomePage() {
   const [action, setAction] = useState("idle");
   const [floatingText, setFloatingText] = useState("");
   const breed = CAT_BREEDS[profile.breedId];
+  const catName = getCatDisplayName(profile.catName);
   const log = getTodayLog();
   const upcoming = reminders
     .filter((reminder) => !reminder.completed)
@@ -30,7 +32,7 @@ export default function HomePage() {
   const level = getRelationshipLevel(points);
   const progress = getRelationshipProgress(points);
 
-  const dialogue = `${getTimeGreeting()}. ${breed.greeting} ${profile.catName} says: ${
+  const dialogue = `${getTimeGreeting()}. ${breed.greeting} ${catName} says: ${
     log.waterGlasses < 4
       ? "A few sips now would make future-you proud."
       : log.mood
@@ -73,7 +75,7 @@ export default function HomePage() {
   return (
     <section className="grid gap-4">
       <div className="sticky top-2 z-20 grid gap-2">
-        <CatRoom action={action} breed={breed} catName={profile.catName} compact expression={actionToExpression(action, log.waterGlasses, log.mood)} onCatInteract={handleCatInteract} ownedItems={ownedItems} />
+        <CatRoom action={action} breed={breed} catName={catName} compact expression={actionToExpression(action, log.waterGlasses, log.mood)} onCatInteract={handleCatInteract} ownedItems={ownedItems} />
         {floatingText && <div className="pointer-events-none -mt-16 justify-self-center rounded-full bg-white/95 px-4 py-2 text-sm font-black text-[#49343a] shadow-xl">{floatingText}</div>}
         <section className="action-scroll -mx-1 flex gap-2 overflow-x-auto rounded-[24px] bg-[#2a1c2d]/90 p-2 shadow-xl backdrop-blur">
           <ActionButton icon={<FiCoffee />} label="Water" onClick={() => triggerAction("feed", "+Water +Bond +Stars", addWater)} />
@@ -86,7 +88,7 @@ export default function HomePage() {
       </div>
 
       <section className="rounded-[28px] border border-white/30 bg-white/80 p-4 shadow-xl backdrop-blur">
-        <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">{breed.name} dialogue</p>
+        <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">{getCatDisplayNameUpper(catName)} dialogue</p>
         <h2 className="mt-1 text-xl font-black leading-snug">{dialogue}</h2>
       </section>
 
@@ -117,7 +119,7 @@ export default function HomePage() {
             <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">Next Reminder</p>
             <h3 className="font-black">{upcoming ? upcoming.title : "No reminders yet"}</h3>
             <p className="text-sm font-bold text-[#7c6460]">
-              {upcoming ? formatReminderDate(upcoming.date, upcoming.time) : "Mochi can help you remember gently."}
+              {upcoming ? formatReminderDate(upcoming.date, upcoming.time) : `${catName} can help you remember gently.`}
             </p>
           </div>
         </div>

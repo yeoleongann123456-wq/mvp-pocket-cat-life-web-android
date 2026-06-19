@@ -23,7 +23,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           <p className="text-xs font-black uppercase tracking-wide text-[#b26d83]">Mochi - The Cat That Cares</p>
           <h1 className="mt-2 text-4xl font-black leading-tight">Not a pet. A cat that cares.</h1>
           <p className="mt-3 text-sm font-bold leading-6 text-[#765b58]">
-            Mochi helps you remember water, rest, steps, moods, tasks, and tiny acts of self-care.
+            Your cat helps you remember water, rest, steps, moods, tasks, and tiny acts of self-care.
           </p>
         </div>
 

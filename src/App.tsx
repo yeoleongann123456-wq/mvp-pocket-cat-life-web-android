@@ -12,6 +12,7 @@ import HomePage from "./pages/HomePage";
 import RemindersPage from "./pages/RemindersPage";
 import TasksPage from "./pages/TasksPage";
 import { useMochiStore } from "./store/useMochiStore";
+import { getCatDisplayNameUpper } from "./utils/catName";
 
 export default function App() {
   const profile = useMochiStore((state) => state.profile);
@@ -20,10 +21,11 @@ export default function App() {
   const recordDailyReturn = useMochiStore((state) => state.recordDailyReturn);
   const notificationsEnabled = profile.notificationPreference === "allowed";
   const breed = CAT_BREEDS[profile.breedId];
+  const catNameUpper = getCatDisplayNameUpper(profile.catName);
 
   useMochiAudio();
   useButtonClickAudio();
-  useReminderNotifications(reminders, notificationsEnabled);
+  useReminderNotifications(reminders, notificationsEnabled, profile.catName);
 
   useEffect(() => {
     if (profile.onboardingComplete) {
@@ -40,7 +42,7 @@ export default function App() {
       <section className="mx-auto grid max-w-[430px] gap-4">
         <header className="flex items-center justify-between rounded-[26px] border border-white/20 bg-white/75 px-4 py-3 shadow-xl backdrop-blur">
           <div>
-            <p className="text-[0.68rem] font-black uppercase tracking-wide text-[#b26d83]">Mochi</p>
+            <p className="text-[0.68rem] font-black uppercase tracking-wide text-[#b26d83]">{catNameUpper}</p>
             <h1 className="text-xl font-black">The Cat That Cares</h1>
           </div>
           <div

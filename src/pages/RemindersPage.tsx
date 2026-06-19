@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FiBell, FiCheck } from "react-icons/fi";
 import type { RepeatOption } from "../types/game";
 import { useMochiStore } from "../store/useMochiStore";
+import { getCatDisplayName } from "../utils/catName";
 import { formatReminderDate, todayKey } from "../utils/date";
 
 export default function RemindersPage() {
@@ -14,7 +15,8 @@ export default function RemindersPage() {
   const toggleReminder = useMochiStore((state) => state.toggleReminder);
   const preference = useMochiStore((state) => state.profile.notificationPreference);
   const setPreference = useMochiStore((state) => state.setNotificationPreference);
-  const catName = useMochiStore((state) => state.profile.catName);
+  const profileCatName = useMochiStore((state) => state.profile.catName);
+  const catName = getCatDisplayName(profileCatName);
 
   async function askNotifications() {
     if (!("Notification" in window)) {
@@ -78,7 +80,7 @@ export default function RemindersPage() {
       <section className="grid gap-3">
         {reminders.length === 0 ? (
           <p className="rounded-[24px] bg-white/70 p-4 text-center text-sm font-bold text-[#7c6460] shadow-lg">
-            No reminders yet. Mochi will wait politely.
+            No reminders yet. {catName} will wait politely.
           </p>
         ) : (
           reminders.map((reminder) => (

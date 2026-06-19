@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { AudioSettings, BreedId, CareTask, HealthLog, MochiState, MoodValue, Reminder, RepeatOption } from "../types/game";
+import { DEFAULT_CAT_NAME } from "../utils/catName";
 import { todayKey } from "../utils/date";
 
 const DEFAULT_HEALTH_LOG = (date: string): HealthLog => ({
@@ -14,7 +15,7 @@ const DEFAULT_HEALTH_LOG = (date: string): HealthLog => ({
 const initialState: MochiState = {
   profile: {
     onboardingComplete: false,
-    catName: "Mochi",
+    catName: DEFAULT_CAT_NAME,
     breedId: "orange",
     notificationPreference: "unknown",
     lastVisitDate: ""
@@ -60,7 +61,7 @@ export type MochiStore = MochiState & MochiActions;
 
 function cleanName(value: string) {
   const name = value.trim().replace(/\s+/g, " ");
-  return name ? name.slice(0, 18) : "Mochi";
+  return name ? name.slice(0, 18) : DEFAULT_CAT_NAME;
 }
 
 function makeId(prefix: string) {
