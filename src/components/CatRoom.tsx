@@ -50,6 +50,7 @@ export default function CatRoom({
 }: CatRoomProps) {
   const [touchMood, setTouchMood] = useState<CatExpression | null>(null);
   const [touchAction, setTouchAction] = useState<string | null>(null);
+  const roomRef = useRef<HTMLElement | null>(null);
   const longPressTimer = useRef<number | null>(null);
   const visual = BREED_VISUALS[breed.id] ?? BREED_VISUALS.orange;
   const has = (itemId: string) => ownedItems.includes(itemId);
@@ -61,8 +62,27 @@ export default function CatRoom({
     "--cat-accent": breed.colors.accent,
     "--head-scale": visual.headScale,
     "--body-scale": visual.bodyScale,
-    "--eye-scale": visual.eyeScale
+    "--eye-scale": visual.eyeScale,
+    "--look-x": 0,
+    "--look-y": 0
   } as CSSProperties;
+
+  function trackPointer(clientX: number, clientY: number) {
+    const room = roomRef.current;
+    if (!room) return;
+    const rect = room.getBoundingClientRect();
+    const x = clamp(((clientX - rect.left) / rect.width - 0.5) * 2, -1, 1);
+    const y = clamp(((clientY - rect.top) / rect.height - 0.45) * 2, -1, 1);
+    room.style.setProperty("--look-x", x.toFixed(2));
+    room.style.setProperty("--look-y", y.toFixed(2));
+  }
+
+  function resetPointerTracking() {
+    const room = roomRef.current;
+    if (!room) return;
+    room.style.setProperty("--look-x", "0");
+    room.style.setProperty("--look-y", "0");
+  }
 
   function pulse(interaction: CatInteraction, mood: CatExpression, nextAction: string, duration = 900) {
     setTouchMood(mood);
@@ -87,8 +107,21 @@ export default function CatRoom({
   }
 
   return (
-    <section className={`room-scene world-${worldPhase} relative overflow-hidden rounded-[28px] border border-white/30 shadow-2xl ${compact ? "room-compact" : ""}`}>
+    <section
+      className={`room-scene world-${worldPhase} relative overflow-hidden rounded-[28px] border border-white/30 shadow-2xl ${compact ? "room-compact" : ""}`}
+      onPointerLeave={resetPointerTracking}
+      onPointerMove={(event) => trackPointer(event.clientX, event.clientY)}
+      onTouchMove={(event) => {
+        const touch = event.touches[0];
+        if (touch) trackPointer(touch.clientX, touch.clientY);
+      }}
+      ref={roomRef}
+      style={catStyle}
+    >
       <RoomLayers has={has} compact={compact} worldPhase={worldPhase} />
+      <div className="cat-speech-bubble absolute left-1/2 top-5 z-20 -translate-x-1/2 rounded-[22px] bg-white/90 px-4 py-3 text-center text-sm font-black leading-5 text-[#49343a] shadow-xl backdrop-blur">
+        {speechFor(activeAction, catName)}
+      </div>
       <motion.div
         animate={animationFor(activeAction)}
         className={`cat-mascot ${visual.className} pose-${visual.pose} expression-${activeExpression} action-${activeAction} tail-${visual.tail} markings-${visual.markings} absolute left-1/2 select-none`}
@@ -102,7 +135,6 @@ export default function CatRoom({
         onPointerLeave={cancelLongPress}
         onPointerUp={cancelLongPress}
         onTap={() => pulse("tap", "happy", "tap-heart", 850)}
-        style={catStyle}
         transition={transitionFor(activeAction)}
       >
         <span className="cat-shadow" />
@@ -152,6 +184,26 @@ export default function CatRoom({
   );
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function speechFor(action: string, catName: string) {
+  const name = catName || "Mochi";
+  if (action === "look") return `${name} is looking at you.`;
+  if (action === "walk") return "Tiny patrol.";
+  if (action === "sit") return "I am here.";
+  if (action === "nap" || action === "sleep") return "Soft nap...";
+  if (action === "stretch") return "Big stretch.";
+  if (action === "window") return "What is outside?";
+  if (action === "toy" || action === "play") return "Play with me?";
+  if (action === "groom" || action === "clean") return "Keeping fluffy.";
+  if (action === "feed") return "Snack time?";
+  if (action === "pet" || action === "tap-heart" || action === "purr") return "That feels nice.";
+  if (action === "work") return "I believe in you.";
+  return `${name} is breathing softly.`;
+}
+
 function RoomLayers({ has, compact, worldPhase }: { has: (itemId: string) => boolean; compact: boolean; worldPhase: WorldPhase }) {
   return (
     <>
@@ -188,6 +240,7 @@ function RoomLayers({ has, compact, worldPhase }: { has: (itemId: string) => boo
 function Eye({ expression, side }: { expression: CatExpression; side: "left" | "right" }) {
   return (
     <span className={`cat-eye cat-eye-${side}`}>
+      <span className="cat-eye-pupil" />
       <span className="cat-eye-gloss" />
       <span className="cat-eye-spark" />
       {expression === "worried" && <span className="cat-brow worried-brow" />}
