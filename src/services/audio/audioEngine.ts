@@ -6,11 +6,38 @@ export type SfxName =
   | "taskComplete"
   | "levelUp"
   | "meow"
+  | "mew1"
+  | "mew2"
+  | "mew3"
+  | "mew4"
+  | "mew5"
   | "purr"
+  | "purr1"
+  | "purr2"
+  | "purr3"
   | "sleepy"
+  | "nyuu1"
+  | "nyuu2"
   | "happy"
+  | "miya1"
+  | "miya2"
+  | "miya3"
+  | "excited"
+  | "nya1"
+  | "nya2"
+  | "nya3"
   | "eat"
   | "purchase";
+
+type VoiceGroup = "tap" | "happy" | "sleepy" | "purr" | "excited";
+
+const voicePools: Record<VoiceGroup, SfxName[]> = {
+  tap: ["mew1", "mew2", "mew3", "mew4", "mew5"],
+  happy: ["miya1", "miya2", "miya3"],
+  sleepy: ["nyuu1", "nyuu2"],
+  purr: ["purr1", "purr2", "purr3"],
+  excited: ["nya1", "nya2", "nya3"]
+};
 
 const defaultSettings: AudioSettings = {
   enabled: true,
@@ -30,6 +57,7 @@ class MochiAudioEngine {
   private ambientTimer: number | null = null;
   private unlocked = false;
   private settings = defaultSettings;
+  private lastVoiceByGroup: Partial<Record<VoiceGroup, SfxName>> = {};
 
   updateSettings(settings: AudioSettings) {
     this.settings = { ...defaultSettings, ...settings };
@@ -55,16 +83,36 @@ class MochiAudioEngine {
     await this.unlock();
     if (!this.context || !this.sfxGain || !this.settings.enabled) return;
     const now = this.context.currentTime;
+    const resolvedName = this.resolveVoice(name);
     if (name === "button") this.tone(520, 0.04, now, "triangle", 0.18);
     if (name === "reward") this.chime([660, 880, 1175], now, 0.12);
     if (name === "taskComplete") this.chime([523, 784, 1046], now, 0.13);
     if (name === "levelUp") this.chime([523, 659, 784, 1046], now, 0.18);
     if (name === "purchase") this.chime([392, 659, 988], now, 0.12);
-    if (name === "meow") this.meow(now);
-    if (name === "purr") this.purr(now);
-    if (name === "sleepy") this.sleepy(now);
-    if (name === "happy") this.chime([784, 988], now, 0.1);
+    if (["mew1", "mew2", "mew3", "mew4", "mew5"].includes(resolvedName)) this.mew(resolvedName, now);
+    if (["purr1", "purr2", "purr3"].includes(resolvedName)) this.purr(resolvedName, now);
+    if (["nyuu1", "nyuu2"].includes(resolvedName)) this.nyuu(resolvedName, now);
+    if (["miya1", "miya2", "miya3"].includes(resolvedName)) this.miya(resolvedName, now);
+    if (["nya1", "nya2", "nya3"].includes(resolvedName)) this.nya(resolvedName, now);
     if (name === "eat") this.eat(now);
+  }
+
+  private resolveVoice(name: SfxName): SfxName {
+    if (name === "meow") return this.pickVoice("tap");
+    if (name === "happy") return this.pickVoice("happy");
+    if (name === "sleepy") return this.pickVoice("sleepy");
+    if (name === "purr") return this.pickVoice("purr");
+    if (name === "excited") return this.pickVoice("excited");
+    return name;
+  }
+
+  private pickVoice(group: VoiceGroup): SfxName {
+    const pool = voicePools[group];
+    const last = this.lastVoiceByGroup[group];
+    const candidates = pool.length > 1 ? pool.filter((item) => item !== last) : pool;
+    const next = candidates[Math.floor(Math.random() * candidates.length)];
+    this.lastVoiceByGroup[group] = next;
+    return next;
   }
 
   private createContext() {
@@ -138,19 +186,55 @@ class MochiAudioEngine {
     notes.forEach((note, index) => this.tone(note, length, start + index * 0.075, "sine", 0.22));
   }
 
-  private meow(start: number) {
-    this.sweep(520, 740, 0.16, start, "triangle", 0.24);
-    this.sweep(740, 430, 0.2, start + 0.13, "triangle", 0.2);
+  private mew(name: SfxName, start: number) {
+    const patterns: Record<string, [number, number, number, number, number]> = {
+      mew1: [620, 860, 520, 0.13, 0.2],
+      mew2: [700, 920, 580, 0.1, 0.16],
+      mew3: [560, 760, 470, 0.16, 0.22],
+      mew4: [760, 980, 640, 0.09, 0.18],
+      mew5: [590, 820, 610, 0.12, 0.18]
+    };
+    const [from, peak, to, up, down] = patterns[name] ?? patterns.mew1;
+    this.sweep(from, peak, up, start, "triangle", 0.16);
+    this.sweep(peak, to, down, start + up * 0.72, "sine", 0.13);
   }
 
-  private purr(start: number) {
-    for (let i = 0; i < 6; i += 1) {
-      this.tone(92 + (i % 2) * 10, 0.11, start + i * 0.09, "sawtooth", 0.07);
+  private miya(name: SfxName, start: number) {
+    const patterns: Record<string, number[]> = {
+      miya1: [740, 988, 880],
+      miya2: [660, 880, 1046],
+      miya3: [784, 1046, 1175]
+    };
+    this.chime(patterns[name] ?? patterns.miya1, start, 0.1);
+    this.sweep((patterns[name] ?? patterns.miya1)[0], 520, 0.18, start + 0.14, "triangle", 0.08);
+  }
+
+  private nyuu(name: SfxName, start: number) {
+    if (name === "nyuu2") {
+      this.sweep(420, 240, 0.5, start, "sine", 0.12);
+      this.sweep(300, 210, 0.28, start + 0.32, "triangle", 0.08);
+      return;
+    }
+    this.sweep(360, 210, 0.58, start, "sine", 0.12);
+  }
+
+  private purr(name: SfxName, start: number) {
+    const base = name === "purr2" ? 112 : name === "purr3" ? 102 : 94;
+    for (let i = 0; i < 7; i += 1) {
+      this.tone(base + (i % 2) * 8, 0.12, start + i * 0.08, "triangle", 0.035);
     }
   }
 
-  private sleepy(start: number) {
-    this.sweep(320, 180, 0.52, start, "sine", 0.16);
+  private nya(name: SfxName, start: number) {
+    const patterns: Record<string, [number, number, number]> = {
+      nya1: [720, 1040, 760],
+      nya2: [820, 1180, 900],
+      nya3: [680, 980, 840]
+    };
+    const [from, peak, to] = patterns[name] ?? patterns.nya1;
+    this.sweep(from, peak, 0.08, start, "triangle", 0.15);
+    this.sweep(peak, to, 0.11, start + 0.06, "triangle", 0.12);
+    this.chime([to, Math.round(to * 1.25)], start + 0.16, 0.08);
   }
 
   private eat(start: number) {

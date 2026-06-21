@@ -57,6 +57,7 @@ export default function HomePage() {
       const next = chooseAutonomousAction();
       setAutonomousAction(next);
       setAutonomousLine(autonomousBehaviorLine(next, catName, profile.breedId));
+      if (next === "look") playMochiSound("meow");
       clearActionTimer = window.setTimeout(() => {
         setAutonomousAction("idle");
         setAutonomousLine("");
@@ -87,7 +88,7 @@ export default function HomePage() {
       addRelationship(2);
       addStars(2);
       recordRetentionAction("pet");
-      playMochiSound("happy");
+      playMochiSound("excited");
       setFloatingText("+Bond +Stars");
     } else if (interaction === "longPress") {
       addRelationship(2);
@@ -203,7 +204,7 @@ function actionToExpression(action: string, waterGlasses: number, mood: string):
 function soundForAction(action: string) {
   if (action === "feed") return "eat";
   if (action === "pet") return "purr";
-  if (action === "play") return "happy";
+  if (action === "play") return "excited";
   if (action === "sleep") return "sleepy";
   if (action === "clean") return "reward";
   if (action === "work") return "taskComplete";

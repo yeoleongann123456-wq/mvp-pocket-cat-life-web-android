@@ -94,6 +94,12 @@ The original Pocket Cat Life prototype is preserved as `legacy-pocket-cat.html`,
   - Visit streak rewards include Day 3, 7, 14, 30, and 100
   - Day/night room state changes by local time; rain mode appears when rain ambience is selected
   - Health actions increase relationship: water, sleep, mood check-in, tasks, reminders, and step logging
+- Mochi Plush & Voice Identity Sprint
+  - Softer plush proportions: rounder face, bigger cheeks, softer paws, fluff accents, softer gradients, and larger eye highlights
+  - Idle cuteness animations: ear twitch, yawn, stretch, head tilt, blink variation, and sleepy nod
+  - Attention seeking: after idle behavior, Mochi can look at the player and make a small soft mew
+  - Voice identity pools: `mew1-5`, `miya1-3`, `nyuu1-2`, `purr1-3`, and `nya1-3`
+  - Voice playback is randomized and avoids immediate repetition
 
 ## Stack
 

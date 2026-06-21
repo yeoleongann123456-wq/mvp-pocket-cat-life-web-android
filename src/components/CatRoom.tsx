@@ -115,6 +115,8 @@ export default function CatRoom({
         <span className="cat-head">
           <span className="cat-ear cat-ear-left"><span /></span>
           <span className="cat-ear cat-ear-right"><span /></span>
+          <span className="cat-plush-fluff fluff-left" />
+          <span className="cat-plush-fluff fluff-right" />
           <span className="cat-fur-mark cat-fur-mark-one" />
           <span className="cat-fur-mark cat-fur-mark-two" />
           <span className="cat-cheek cat-cheek-left" />
@@ -123,6 +125,7 @@ export default function CatRoom({
           <Eye expression={activeExpression} side="right" />
           <span className="cat-nose" />
           <Mouth expression={activeExpression} />
+          <span className="cat-yawn" />
           <span className="cat-whisker cat-whisker-left" />
           <span className="cat-whisker cat-whisker-right" />
           {(has("rose-collar") || breed.id === "dragon") && <span className="cat-collar" />}
