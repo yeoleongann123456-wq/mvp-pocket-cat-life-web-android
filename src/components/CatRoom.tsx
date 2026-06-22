@@ -179,9 +179,9 @@ export default function CatRoom({
         {(activeAction === "sleep" || activeAction === "nap") && <Zzz />}
       </motion.div>
       {activeAction !== "idle" && <div className="floating-reward absolute left-1/2 top-24 -translate-x-1/2 rounded-full bg-white/90 px-4 py-2 text-sm font-black text-[#49343a] shadow-xl">+care</div>}
-      {catName && (
-        <div className="absolute bottom-4 left-4 rounded-full bg-black/25 px-4 py-2 text-sm font-black text-white backdrop-blur">
-          {catName}
+      {(catName || immersive) && (
+        <div className={`cat-mood-label absolute bottom-4 left-4 rounded-full px-4 py-2 text-sm font-black text-white backdrop-blur ${immersive ? "bg-white/35 text-[#49343a]" : "bg-black/25"}`}>
+          {immersive ? moodLabelFor(activeExpression, activeAction) : catName}
         </div>
       )}
     </section>
@@ -206,6 +206,15 @@ function speechFor(action: string, catName: string) {
   if (action === "pet" || action === "tap-heart" || action === "purr") return "That feels nice.";
   if (action === "work") return "I believe in you.";
   return `${name} is breathing softly.`;
+}
+
+function moodLabelFor(expression: CatExpression, action: string) {
+  if (action === "sleep" || action === "nap" || expression === "sleepy") return "🥱 Sleepy";
+  if (expression === "hungry") return "💧 Wants water";
+  if (action === "pet" || action === "purr" || action === "tap-heart") return "❤️ Feeling loved";
+  if (expression === "sad" || expression === "worried") return "🤍 Needs comfort";
+  if (action === "play" || action === "toy" || expression === "excited") return "✨ Playful";
+  return "😊 Happy today";
 }
 
 function RoomLayers({ has, compact, worldPhase }: { has: (itemId: string) => boolean; compact: boolean; worldPhase: WorldPhase }) {

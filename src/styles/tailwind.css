@@ -149,7 +149,7 @@ body {
   position: absolute;
   left: 0.75rem;
   right: 0.75rem;
-  bottom: calc(4.9rem + env(safe-area-inset-bottom));
+  bottom: calc(5.55rem + env(safe-area-inset-bottom));
   z-index: 30;
   display: flex;
   gap: 0.55rem;
@@ -178,7 +178,7 @@ body {
 .home-floating-text {
   position: absolute;
   left: 50%;
-  top: 40%;
+  top: 48%;
   z-index: 35;
   transform: translateX(-50%);
 }
@@ -371,8 +371,8 @@ body {
 }
 
 .room-immersive .cat-mascot {
-  --mascot-scale: 1.78;
-  bottom: calc(8.4rem + env(safe-area-inset-bottom));
+  --mascot-scale: 1.72;
+  bottom: calc(10.25rem + env(safe-area-inset-bottom));
   z-index: 12;
 }
 
@@ -394,11 +394,33 @@ body {
 }
 
 .room-immersive .cat-speech-bubble {
-  top: calc(4.4rem + env(safe-area-inset-top));
+  top: calc(8.25rem + env(safe-area-inset-top));
   max-width: min(82%, 320px);
   border: 1px solid rgba(255, 255, 255, 0.68);
   background: rgba(255, 255, 255, 0.72);
   color: #49343a;
+}
+
+.room-immersive .cat-mood-label {
+  bottom: calc(8.8rem + env(safe-area-inset-bottom));
+  left: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 12px 24px rgba(73, 52, 58, 0.12);
+}
+
+@media (max-height: 740px) {
+  .room-immersive .cat-mascot {
+    --mascot-scale: 1.54;
+    bottom: calc(9.4rem + env(safe-area-inset-bottom));
+  }
+
+  .room-immersive .cat-speech-bubble {
+    top: calc(7rem + env(safe-area-inset-top));
+  }
+
+  .home-action-dock {
+    bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
 }
 
 .cat-speech-bubble::after {
