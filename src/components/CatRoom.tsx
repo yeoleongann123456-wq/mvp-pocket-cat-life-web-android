@@ -16,6 +16,8 @@ type CatRoomProps = {
   action?: string;
   worldPhase?: WorldPhase;
   compact?: boolean;
+  immersive?: boolean;
+  speech?: string;
   onCatInteract?: (interaction: CatInteraction) => void;
 };
 
@@ -46,6 +48,8 @@ export default function CatRoom({
   action = "idle",
   worldPhase = "morning",
   compact = false,
+  immersive = false,
+  speech,
   onCatInteract
 }: CatRoomProps) {
   const [touchMood, setTouchMood] = useState<CatExpression | null>(null);
@@ -108,7 +112,7 @@ export default function CatRoom({
 
   return (
     <section
-      className={`room-scene world-${worldPhase} relative overflow-hidden rounded-[28px] border border-white/30 shadow-2xl ${compact ? "room-compact" : ""}`}
+      className={`room-scene world-${worldPhase} relative overflow-hidden ${immersive ? "room-immersive" : "rounded-[28px] border border-white/30 shadow-2xl"} ${compact ? "room-compact" : ""}`}
       onPointerLeave={resetPointerTracking}
       onPointerMove={(event) => trackPointer(event.clientX, event.clientY)}
       onTouchMove={(event) => {
@@ -120,7 +124,7 @@ export default function CatRoom({
     >
       <RoomLayers has={has} compact={compact} worldPhase={worldPhase} />
       <div className="cat-speech-bubble absolute left-1/2 top-5 z-20 -translate-x-1/2 rounded-[22px] bg-white/90 px-4 py-3 text-center text-sm font-black leading-5 text-[#49343a] shadow-xl backdrop-blur">
-        {speechFor(activeAction, catName)}
+        {speech || speechFor(activeAction, catName)}
       </div>
       <motion.div
         animate={animationFor(activeAction)}
