@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { FiAward, FiGift, FiX } from "react-icons/fi";
+import { playMochiSound } from "../hooks/useMochiAudio";
 import { useMochiStore } from "../store/useMochiStore";
 import { getCatDisplayName } from "../utils/catName";
 
@@ -9,6 +11,10 @@ export default function RetentionPopups() {
   const dismissRandomEvent = useMochiStore((state) => state.dismissRandomEvent);
   const dismissAchievement = useMochiStore((state) => state.dismissAchievement);
   const catName = getCatDisplayName(profileCatName);
+
+  useEffect(() => {
+    if (activeAchievement) playMochiSound("mochiAchievement");
+  }, [activeAchievement?.id]);
 
   return (
     <>

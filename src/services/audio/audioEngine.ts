@@ -5,6 +5,10 @@ export type SfxName =
   | "reward"
   | "taskComplete"
   | "levelUp"
+  | "mochiSignature"
+  | "mochiGreeting"
+  | "mochiAchievement"
+  | "mochiLevelUp"
   | "meow"
   | "mew1"
   | "mew2"
@@ -30,6 +34,25 @@ export type SfxName =
   | "purchase";
 
 type VoiceGroup = "tap" | "happy" | "sleepy" | "purr" | "excited";
+type ThemeEvent = {
+  frequency: number;
+  start: number;
+  duration: number;
+  type: OscillatorType;
+  gain: number;
+};
+
+type ThemePattern = {
+  events: ThemeEvent[];
+  loopMs: number;
+};
+
+const mochiMotif = {
+  signature: [784, 659, 880, 1046],
+  greeting: [784, 880, 1046],
+  achievement: [880, 1046, 1175, 1319],
+  levelUp: [659, 784, 880, 1046]
+};
 
 const voicePools: Record<VoiceGroup, SfxName[]> = {
   tap: ["mew1", "mew2", "mew3", "mew4", "mew5"],
@@ -85,9 +108,11 @@ class MochiAudioEngine {
     const now = this.context.currentTime;
     const resolvedName = this.resolveVoice(name);
     if (name === "button") this.tone(520, 0.04, now, "triangle", 0.18);
-    if (name === "reward") this.chime([660, 880, 1175], now, 0.12);
+    if (name === "reward" || name === "mochiAchievement") this.mochiAchievement(now);
     if (name === "taskComplete") this.chime([523, 784, 1046], now, 0.13);
-    if (name === "levelUp") this.chime([523, 659, 784, 1046], now, 0.18);
+    if (name === "levelUp" || name === "mochiLevelUp") this.mochiLevelUp(now);
+    if (name === "mochiSignature") this.mochiSignature(now);
+    if (name === "mochiGreeting") this.mochiGreeting(now);
     if (name === "purchase") this.chime([392, 659, 988], now, 0.12);
     if (["mew1", "mew2", "mew3", "mew4", "mew5"].includes(resolvedName)) this.mew(resolvedName, now);
     if (["purr1", "purr2", "purr3"].includes(resolvedName)) this.purr(resolvedName, now);
@@ -157,8 +182,8 @@ class MochiAudioEngine {
     const playPattern = () => {
       if (!this.context || !this.musicGain || !this.settings.enabled) return;
       const start = this.context.currentTime + 0.02;
-      pattern.notes.forEach((note, index) => {
-        this.tone(note, pattern.noteLength, start + index * pattern.spacing, pattern.wave, pattern.gain, this.musicGain);
+      pattern.events.forEach((event) => {
+        this.tone(event.frequency, event.duration, start + event.start, event.type, event.gain, this.musicGain);
       });
     };
     playPattern();
@@ -184,6 +209,40 @@ class MochiAudioEngine {
 
   private chime(notes: number[], start: number, length: number) {
     notes.forEach((note, index) => this.tone(note, length, start + index * 0.075, "sine", 0.22));
+  }
+
+  private mochiSignature(start: number) {
+    mochiMotif.signature.forEach((note, index) => {
+      const noteStart = start + index * 0.15;
+      this.tone(note, index === 3 ? 0.42 : 0.2, noteStart, "sine", 0.18);
+      this.tone(note * 2, 0.12, noteStart + 0.01, "triangle", 0.04);
+    });
+    this.sweep(1046, 1319, 0.18, start + 0.48, "sine", 0.06);
+  }
+
+  private mochiGreeting(start: number) {
+    mochiMotif.greeting.forEach((note, index) => {
+      this.tone(note, index === 2 ? 0.28 : 0.14, start + index * 0.11, "sine", 0.12);
+    });
+    this.sweep(880, 660, 0.16, start + 0.27, "triangle", 0.045);
+  }
+
+  private mochiAchievement(start: number) {
+    mochiMotif.achievement.forEach((note, index) => {
+      const noteStart = start + index * 0.08;
+      this.tone(note, 0.15, noteStart, "sine", 0.16);
+      this.tone(note * 1.5, 0.08, noteStart + 0.035, "triangle", 0.04);
+    });
+    this.chime([1568, 1760], start + 0.34, 0.12);
+  }
+
+  private mochiLevelUp(start: number) {
+    mochiMotif.levelUp.forEach((note, index) => {
+      const noteStart = start + index * 0.18;
+      this.tone(note, index === 3 ? 0.52 : 0.24, noteStart, "sine", 0.16);
+      this.tone(note / 2, 0.34, noteStart, "triangle", 0.035);
+    });
+    this.sweep(1046, 1175, 0.32, start + 0.66, "sine", 0.065);
   }
 
   private mew(name: SfxName, start: number) {
@@ -301,14 +360,61 @@ class MochiAudioEngine {
   }
 }
 
-function musicPattern(track: MusicTrack) {
+function musicPattern(track: MusicTrack): ThemePattern {
+  const motifEvents = (offset: number, gain = 0.055, transpose = 1): ThemeEvent[] =>
+    mochiMotif.signature.map((frequency, index) => ({
+      frequency: Math.round(frequency * transpose),
+      start: offset + index * 0.2,
+      duration: index === 3 ? 0.52 : 0.22,
+      type: "sine",
+      gain
+    }));
+
+  const padEvents = (offset: number, notes: number[]): ThemeEvent[] =>
+    notes.map((frequency, index) => ({
+      frequency,
+      start: offset + index * 4,
+      duration: 2.8,
+      type: "triangle",
+      gain: 0.025
+    }));
+
   if (track === "softLofi") {
-    return { notes: [220, 277, 330, 277, 196, 247, 294, 247], noteLength: 0.24, spacing: 0.34, loopMs: 3200, wave: "triangle" as OscillatorType, gain: 0.07 };
+    return {
+      loopMs: 64000,
+      events: [
+        ...padEvents(0, [220, 277, 330, 277, 196, 247, 294, 247, 220, 330, 277, 196, 247, 294, 330, 277]),
+        ...motifEvents(3.2, 0.048, 0.5),
+        ...motifEvents(19.2, 0.044, 0.5),
+        ...motifEvents(35.2, 0.05, 0.5),
+        ...motifEvents(51.2, 0.046, 0.5)
+      ]
+    };
   }
   if (track === "relaxing") {
-    return { notes: [262, 330, 392, 523, 392, 330], noteLength: 0.42, spacing: 0.52, loopMs: 3900, wave: "sine" as OscillatorType, gain: 0.06 };
+    return {
+      loopMs: 72000,
+      events: [
+        ...padEvents(0, [262, 330, 392, 523, 392, 330, 294, 349, 392, 330, 262, 330, 392, 523, 587, 523, 392, 330]),
+        ...motifEvents(7.5, 0.04, 0.5),
+        ...motifEvents(27.5, 0.044, 0.5),
+        ...motifEvents(47.5, 0.042, 0.5),
+        ...motifEvents(63.5, 0.038, 0.5)
+      ]
+    };
   }
-  return { notes: [523, 659, 784, 659, 587, 698, 880, 698], noteLength: 0.18, spacing: 0.32, loopMs: 3300, wave: "sine" as OscillatorType, gain: 0.07 };
+  return {
+    loopMs: 64000,
+    events: [
+      ...padEvents(0, [262, 330, 392, 330, 294, 349, 440, 349, 262, 392, 330, 294, 349, 440, 523, 392]),
+      ...motifEvents(2.6, 0.052),
+      ...motifEvents(18.6, 0.046),
+      ...motifEvents(34.6, 0.052),
+      ...motifEvents(50.6, 0.048),
+      { frequency: 1568, start: 51.36, duration: 0.16, type: "sine", gain: 0.026 },
+      { frequency: 1760, start: 51.56, duration: 0.18, type: "sine", gain: 0.022 }
+    ]
+  };
 }
 
 function clamp(value: number) {

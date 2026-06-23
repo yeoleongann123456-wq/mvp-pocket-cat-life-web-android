@@ -41,6 +41,11 @@ The original Pocket Cat Life prototype is preserved as `legacy-pocket-cat.html`,
   - Ambient loops: day, night, rain
   - Background music loops: cozy piano, soft lofi, relaxing
   - Sound on/off toggle, music volume slider, SFX volume slider, music/ambience selectors
+- Mochi Brand Sound Identity
+  - Official 4-note Mochi signature motif: warm bell notes built around `G5 -> E5 -> A5 -> C6`
+  - App launch signature sound, short cat greeting motif, achievement variation, and relationship level-up variation
+  - 64-72 second seamless Web Audio theme loops that weave the signature motif into cozy piano, soft lofi, and relaxing tracks
+  - Music-box, toy-piano, soft-bell, tiny-chime, and subtle purr-like textures designed for mobile speakers
 - Cat collection
   - Locked and unlocked cat preview cards
   - Unlock goals for Ragdoll, British Shorthair, Black Cat, Munchkin, and Lucky Dragon Cat
@@ -263,15 +268,34 @@ Notes:
 ## How to Test Audio
 
 1. Open the app in Safari or Chrome.
-2. Tap any button once. Audio starts only after this user gesture.
+2. Tap any button once. Audio starts only after this user gesture, then the Mochi signature sound plays as the launch cue.
 3. Open the `Sound` panel near the top of the app.
 4. Toggle sound on/off.
 5. Adjust `Music Volume` and `SFX Volume`.
 6. Try music tracks: `Cozy Piano`, `Soft Lofi`, `Relaxing`.
 7. Try ambience: `Day`, `Night`, `Rain`, `Off`.
-8. Tap Mochi, pet Mochi, use Water/Play/Sleep, buy a shop item, and complete a task to hear different SFX.
+8. Tap Mochi for the short greeting motif.
+9. Pet Mochi, use Water/Play/Sleep, buy a shop item, complete a task, and unlock an achievement to hear different SFX.
 
 Audio is synthesized with the browser Web Audio API, so no large audio files are required and the PWA remains offline-friendly.
+
+## Mochi Brand Sound Identity
+
+The sound identity is intentionally small, memorable, and soft:
+
+- Signature melody: `G5 -> E5 -> A5 -> C6`
+- App launch: the full signature motif with a tiny upward sparkle tail
+- Cat greeting: a shorter `G5 -> A5 -> C6` version
+- Achievement: a brighter higher variation with chimes
+- Relationship level up: a slower, warmer variation with soft lower support notes
+- Main theme: 64-72 second looped Web Audio patterns using the signature melody inside music-box, toy-piano, soft-bell, and chime textures
+
+Implementation notes:
+
+- The sound system lives in `src/services/audio/audioEngine.ts`.
+- Public sound names include `mochiSignature`, `mochiGreeting`, `mochiAchievement`, and `mochiLevelUp`.
+- Mobile browsers block autoplay, so the launch signature plays on the first user gesture instead of before interaction.
+- Music and SFX volume settings are saved in `localStorage` under `mochiCareSave`.
 
 ## How to Test Retention Systems
 

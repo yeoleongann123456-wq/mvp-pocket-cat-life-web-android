@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiCoffee, FiGift, FiHeart, FiMoon, FiSmile, FiSun } from "react-icons/fi";
 import type { ReactNode } from "react";
 import AudioControls from "../components/AudioControls";
@@ -29,6 +29,7 @@ export default function HomePage() {
   const [autonomousAction, setAutonomousAction] = useState<AutonomousCatAction>("idle");
   const [autonomousLine, setAutonomousLine] = useState("");
   const [floatingText, setFloatingText] = useState("");
+  const previousRelationshipLevel = useRef("");
   const breed = CAT_BREEDS[profile.breedId];
   const catName = getCatDisplayName(profile.catName);
   const log = getTodayLog();
@@ -36,6 +37,17 @@ export default function HomePage() {
   const dailyDone = retention.dailyGoals.filter((goal) => goal.claimed).length;
   const worldPhase = worldPhaseFor(new Date(), ambientTrack);
   const roomAction = action === "idle" ? autonomousAction : action;
+
+  useEffect(() => {
+    if (!previousRelationshipLevel.current) {
+      previousRelationshipLevel.current = level;
+      return;
+    }
+    if (previousRelationshipLevel.current !== level) {
+      previousRelationshipLevel.current = level;
+      playMochiSound("mochiLevelUp");
+    }
+  }, [level]);
 
   const dialogue = `${
     log.waterGlasses < 4
@@ -52,7 +64,7 @@ export default function HomePage() {
       const next = chooseAutonomousAction();
       setAutonomousAction(next);
       setAutonomousLine(autonomousBehaviorLine(next, catName, profile.breedId));
-      if (next === "look") playMochiSound("meow");
+      if (next === "look") playMochiSound("mochiGreeting");
       clearActionTimer = window.setTimeout(() => {
         setAutonomousAction("idle");
         setAutonomousLine("");
@@ -96,7 +108,7 @@ export default function HomePage() {
     } else {
       addRelationship(1);
       recordRetentionAction("pet");
-      playMochiSound("meow");
+      playMochiSound("mochiGreeting");
       setFloatingText("+Love");
     }
     window.setTimeout(() => setFloatingText(""), 900);

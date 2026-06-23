@@ -1,4 +1,4 @@
-const CACHE_NAME = "mochi-cares-audio-v2";
+const CACHE_NAME = "mochi-cares-audio-v3";
 const ASSETS = [
   "./",
   "./index.html",
