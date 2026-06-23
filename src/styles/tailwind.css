@@ -75,7 +75,7 @@ body {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: 7rem;
+  bottom: 8.7rem;
   width: min(118vw, 560px);
   height: 34%;
   border-radius: 50% 50% 0 0;
@@ -89,7 +89,7 @@ body {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: 8.3rem;
+  bottom: 10.35rem;
   width: min(86vw, 360px);
   height: 92px;
   border-radius: 50%;
@@ -149,7 +149,7 @@ body {
   position: absolute;
   left: 0.75rem;
   right: 0.75rem;
-  bottom: calc(5.55rem + env(safe-area-inset-bottom));
+  bottom: calc(4.7rem + env(safe-area-inset-bottom));
   z-index: 30;
   display: flex;
   gap: 0.55rem;
@@ -223,7 +223,7 @@ body {
 }
 
 .room-immersive .room-rug {
-  bottom: 8.1rem;
+  bottom: 10.05rem;
   height: 110px;
   width: min(84vw, 360px);
   opacity: 0.64;
@@ -372,7 +372,7 @@ body {
 
 .room-immersive .cat-mascot {
   --mascot-scale: 1.72;
-  bottom: calc(10.25rem + env(safe-area-inset-bottom));
+  bottom: calc(12.15rem + env(safe-area-inset-bottom));
   z-index: 12;
 }
 
@@ -394,7 +394,7 @@ body {
 }
 
 .room-immersive .cat-speech-bubble {
-  top: calc(8.25rem + env(safe-area-inset-top));
+  top: calc(8.9rem + env(safe-area-inset-top));
   max-width: min(82%, 320px);
   border: 1px solid rgba(255, 255, 255, 0.68);
   background: rgba(255, 255, 255, 0.72);
@@ -402,7 +402,7 @@ body {
 }
 
 .room-immersive .cat-mood-label {
-  bottom: calc(8.8rem + env(safe-area-inset-bottom));
+  bottom: calc(7.55rem + env(safe-area-inset-bottom));
   left: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.45);
   box-shadow: 0 12px 24px rgba(73, 52, 58, 0.12);
@@ -411,15 +411,23 @@ body {
 @media (max-height: 740px) {
   .room-immersive .cat-mascot {
     --mascot-scale: 1.54;
-    bottom: calc(9.4rem + env(safe-area-inset-bottom));
+    bottom: calc(10.85rem + env(safe-area-inset-bottom));
   }
 
   .room-immersive .cat-speech-bubble {
-    top: calc(7rem + env(safe-area-inset-top));
+    top: calc(7.65rem + env(safe-area-inset-top));
   }
 
   .home-action-dock {
-    bottom: calc(5rem + env(safe-area-inset-bottom));
+    bottom: calc(4.45rem + env(safe-area-inset-bottom));
+  }
+
+  .room-immersive .room-rug {
+    bottom: 9.05rem;
+  }
+
+  .home-immersive::after {
+    bottom: 9.35rem;
   }
 }
 
